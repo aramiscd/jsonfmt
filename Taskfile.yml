@@ -1,0 +1,103 @@
+# go get -u -v github.com/go-task/task/cmd/task
+
+version : 2
+
+vars :
+  ghc         : /usr/bin/ghc
+  build_dir   : build
+  main_module : src/Main.hs
+  target      : myExecutable
+  tests       : tests/tests.hs
+
+  modules :
+    src/Parse.hs
+    src/Parse/Json.hs
+
+  deps :
+    deps/aramiscd/haskell-ulme/src/Ulme.hs
+    deps/aramiscd/haskell-ulme/src/Ulme/Basics.hs
+    deps/aramiscd/haskell-ulme/src/Ulme/Char.hs
+    deps/aramiscd/haskell-ulme/src/Ulme/Dict.hs
+    deps/aramiscd/haskell-ulme/src/Ulme/List.hs
+    deps/aramiscd/haskell-ulme/src/Ulme/Log.hs
+    deps/aramiscd/haskell-ulme/src/Ulme/Maybe.hs
+    deps/aramiscd/haskell-ulme/src/Ulme/Result.hs
+    deps/aramiscd/haskell-ulme/src/Ulme/Set.hs
+    deps/aramiscd/haskell-ulme/src/Ulme/String.hs
+    deps/aramiscd/haskell-ulme/src/Ulme/Tuple.hs
+
+  ghc_args :
+    -hidir {{.build_dir}}
+    -odir {{.build_dir}}
+    -Werror
+    -Weverything
+    -Wno-missing-import-lists
+    -Wno-monomorphism-restriction
+    -Wno-redundant-constraints
+    -Wno-safe
+    -Wno-type-defaults
+    -XLambdaCase
+    -XNoImplicitPrelude
+    -XOverloadedStrings
+    -XPackageImports
+    -XStrict
+
+  ghc_dev_args :
+    -O0
+    -Wno-missing-exported-signatures
+    -Wno-missing-local-signatures
+    -Wno-missing-signatures
+    -Wno-unsafe
+    -Wno-unused-imports
+    -Wno-unused-local-binds
+    -Wno-unused-matches
+    -Wno-unused-top-binds
+
+  ghc_test_args : -Wno-unsafe
+
+tasks :
+  setup :
+    cmds :
+      [ " if [ ! -d deps/aramiscd/haskell-ulme ]; then
+          git clone git@eee.ygg:haskell-ulme deps/aramiscd/haskell-ulme;
+          fi
+        "
+      ]
+    
+  build :
+    cmds :
+      [ " mkdir -p ./build/ "
+      , " {{.ghc}} {{.ghc_args}} {{.main_module}}
+          {{.modules}} {{.deps}} -o {{.build_dir}}/{{.target}}
+        "
+      ]
+
+  build-dev :
+    cmds :
+      [ " mkdir -p ./build/ "
+      , " {{.ghc}} {{.ghc_args}} {{.ghc_dev_args}} {{.main_module}}
+          {{.modules}} {{.deps}} -o {{.build_dir}}/{{.target}}
+        "
+      ]
+
+  watch :
+    silent  : true
+    cmds    :
+      [ " while true
+        ; do inotifywait -e modify -q -r src
+        ; task build-dev && clear && task run
+        ; done
+        "
+      ]
+
+  test :
+    cmds :
+      [ " {{.ghc}} {{.ghc_args}} {{.ghc_dev_args}} {{.ghc_test_args}}
+          {{.tests}} {{.modules}} {{.deps}}
+        "
+      , " tests/tests "
+      ]
+
+  run :
+    silent  : true
+    cmds    : [ " {{.build_dir}}/{{.target}} " ]
