@@ -75,7 +75,8 @@ element =
 
 string :: Parser
 string =
-    Parse.sequence [ Parse.char '"', characters, Parse.char '"' ]
+    Parse.merge
+        ( Parse.sequence [ Parse.char '"', characters, Parse.char '"' ] )
 
 
 characters :: Parser
@@ -140,7 +141,8 @@ hex =
 
 number :: Parser
 number =
-    Parse.sequence [ integer, fraction, exponent ]
+    Parse.merge
+        ( Parse.sequence [ integer, fraction, exponent ] )
 
 
 integer :: Parser

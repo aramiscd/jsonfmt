@@ -16,6 +16,9 @@ module Parse
     , zeroOrMore
     , oneOrMore
 
+    , map
+    , merge
+
     -- advanced parsers
 
     , whitespace
@@ -23,13 +26,13 @@ module Parse
     )
 where
         
-import Ulme
+import Ulme hiding ( map )
 import qualified Ulme.List as List
 import qualified Ulme.String as String
 
 
-type Parser =
-    String -> Result ( String, String ) ( String, String )
+type Parser
+    = String -> Result ( String, String ) ( [ String ], String )
 
 
 char :: Char -> Parser
@@ -41,7 +44,7 @@ char match input =
     case input of
         head : tail ->
             if head == match
-            then Ok ( String.fromChar match, tail )
+            then Ok ( [ String.fromChar match ], tail )
             else error 
 
         _ -> error
@@ -53,8 +56,16 @@ string match input =
 Parse a `String`.
 -}
     if String.startsWith match input
-    then Ok ( match, ( String.dropLeft ( String.length match ) input ) )
-    else Err ( match, input )
+    then
+        Ok
+            ( [ match ]
+            , String.dropLeft ( String.length match ) input
+            )
+    else
+        Err
+            ( match
+            , input
+            )
 
 
 succeed :: Parser
@@ -66,7 +77,7 @@ application of parsers.  We could directly use `Ok`
 instead, but this is probably more readable.
 -}
 succeed input =
-    Ok ( "", input )
+    Ok ( [], input )
 
 
 {-
@@ -88,7 +99,7 @@ Useful as the last parser in a sequence of parsers to make
 sure that there is no remaining input.
 -}
 end input =
-    if input == "" then Ok ( "", "" ) else Err ( "", input )
+    if input == "" then Ok ( [], "" ) else Err ( "", input )
 
 
 succ :: Parser -> Parser -> Parser
@@ -138,7 +149,7 @@ Optionally apply a parser.
 optional parse input =
     case parse input of
         Ok value -> Ok value
-        _       -> Ok ( "", input )
+        _       -> Ok ( [], input )
 
 
 oneOrMore :: Parser -> Parser
@@ -155,6 +166,23 @@ Apply a parser as often as possible.
 -}
 zeroOrMore parse =
     optional ( oneOrMore parse )
+
+
+map :: ( [ String ] -> [ String ] ) -> Parser -> Parser
+{-
+Map over a parsing result.
+-}
+map fn parse input =
+    case parse input of
+        Ok ( done, todo ) -> Ok ( fn done, todo )
+        Err error         -> Err error
+
+merge :: Parser -> Parser
+merge parse input =
+    let do_merge = List.foldr (++) "" >> List.singleton in
+    case parse input of
+        Ok ( done, todo ) -> Ok ( do_merge done, todo )
+        Err error         -> Err error
 
 
 whitespace :: Parser
