@@ -39,8 +39,12 @@ Parse a single `Char`.
 char match input =
     let error = Err ( String.fromChar match, input ) in
     case input of
-        head : tail -> if head == match then Ok ( "", tail ) else error 
-        _           -> error
+        head : tail ->
+            if head == match
+            then Ok ( String.fromChar match, tail )
+            else error 
+
+        _ -> error
 
 
 string :: String -> Parser
@@ -49,7 +53,7 @@ string match input =
 Parse a `String`.
 -}
     if String.startsWith match input
-    then Ok ( "", ( String.dropLeft ( String.length match ) input ) )
+    then Ok ( match, ( String.dropLeft ( String.length match ) input ) )
     else Err ( match, input )
 
 
@@ -93,8 +97,12 @@ Apply two parsers, one after the other.
 -}
 succ parser1 parser2 input =
     case parser1 input of
-        Ok ( done, todo ) -> parser2 todo
-        error   -> error
+        Ok ( done1, todo1 ) ->
+            case parser2 todo1 of
+                Ok ( done2, todo2 ) -> Ok ( done1 ++ done2, todo2 )
+                error -> error
+
+        error -> error
 
 
 sequence :: [ Parser ] -> Parser
@@ -129,7 +137,7 @@ Optionally apply a parser.
 -}
 optional parse input =
     case parse input of
-        Ok tail -> Ok tail
+        Ok value -> Ok value
         _       -> Ok ( "", input )
 
 
