@@ -45,6 +45,7 @@ vars :
   ghc_dev_args :
     -O0
     -Wno-missing-exported-signatures
+    -Wno-missing-export-lists
     -Wno-missing-local-signatures
     -Wno-missing-signatures
     -Wno-unsafe
