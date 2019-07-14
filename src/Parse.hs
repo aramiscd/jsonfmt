@@ -29,7 +29,7 @@ import qualified Ulme.String as String
 
 
 type Parser =
-    String -> Result ( String, String, String ) String
+    String -> Result ( String, String ) String
 
 
 char :: Char -> Parser
@@ -37,7 +37,7 @@ char :: Char -> Parser
 Parse a single `Char`.
 -}
 char match input =
-    let error = Err ( "match", String.fromChar match, input ) in
+    let error = Err ( String.fromChar match, input ) in
     case input of
         head : tail -> if head == match then Ok tail else error 
         _           -> error
@@ -50,7 +50,7 @@ Parse a `String`.
 -}
     if String.startsWith match input
     then Ok ( String.dropLeft ( String.length match ) input )
-    else Err ( "string", match, input )
+    else Err ( match, input )
 
 
 succeed :: Parser
@@ -73,7 +73,7 @@ parallel until one succeeds.
 -}
 fail :: Parser
 fail input =
-    Err ( "fail", "", input )
+    Err ( "", input )
 
 
 end :: Parser
@@ -84,7 +84,7 @@ Useful as the last parser in a sequence of parsers to make
 sure that there is no remaining input.
 -}
 end input =
-    if input == "" then Ok "" else Err ( "end", "", input )
+    if input == "" then Ok "" else Err ( "", input )
 
 
 succ :: Parser -> Parser -> Parser
