@@ -1,4 +1,4 @@
-module Parse.Json ( json, whitespace ) where
+module Parse.Json ( json ) where
 
 import Ulme
 
@@ -30,16 +30,17 @@ object :: Parser
 object =
     Parse.sequence
         [ Parse.char '{'
-        , Parse.oneOf [ whitespace, members ]
+        , Parse.oneOf [ members, whitespace ]
         , Parse.char '}'
         ]
 
 
 members :: Parser
 members =
-    Parse.oneOf
+    Parse.sequence
         [ member
-        , Parse.sequence [ member, Parse.char ',', members ]
+        , Parse.optional
+            ( Parse.sequence [ Parse.char ',', members ] )
         ]
 
 
@@ -53,16 +54,17 @@ array :: Parser
 array =
     Parse.sequence
         [ Parse.char '['
-        , Parse.oneOf [ whitespace, elements ]
+        , Parse.oneOf [ elements, whitespace ]
         , Parse.char ']'
         ]
 
 
 elements :: Parser
 elements =
-    Parse.oneOf
+    Parse.sequence
         [ element
-        , Parse.sequence [ element, Parse.char ',', elements ]
+        , Parse.optional
+            ( Parse.sequence [ Parse.char ',' , elements ] )
         ]
 
 
@@ -78,8 +80,7 @@ string =
 
 characters :: Parser
 characters  =
-        Parse.optional
-            ( Parse.sequence [ character, characters ] )
+    Parse.zeroOrMore character
 
 
 character :: Parser
@@ -145,16 +146,16 @@ number =
 integer :: Parser
 integer =
     Parse.oneOf
-        [ digit
-        , Parse.sequence [ onenine, digits ]
-        , Parse.sequence [ Parse.char '-', digit ]
+        [ Parse.sequence [ onenine, digits ]
+        , digit
         , Parse.sequence [ Parse.char '-', onenine, digits ]
+        , Parse.sequence [ Parse.char '-', digit ]
         ]
 
 
 digits :: Parser
 digits =
-    Parse.oneOf [ digit, Parse.sequence [ digit, digits ] ]
+    Parse.oneOrMore digit
 
 
 digit :: Parser
