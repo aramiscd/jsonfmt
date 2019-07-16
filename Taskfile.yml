@@ -11,7 +11,7 @@ vars :
 
   modules :
     src/Parse.hs
-    src/Parse/Json.hs
+    src/Json/Parse.hs
 
   deps :
     deps/aramiscd/haskell-ulme/src/Ulme.hs

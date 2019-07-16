@@ -21,10 +21,10 @@ type Parser a
 
 
 string :: String -> Parser [ String ]
-string match input =
 {-
-Parse a `String`.
+    Parse a `String`.
 -}
+string match input =
     if String.startsWith match input
     then
         Ok
@@ -32,41 +32,38 @@ Parse a `String`.
             , String.dropLeft ( String.length match ) input
             )
     else
-        Err
-            ( match
-            , input
-            )
+        Err ( match, input )
 
 
 optional :: Parser [ a ] -> Parser [ a ]
 {-
-Optionally apply a parser.
+    Optionally apply a parser.
 -}
 optional parse input =
     case parse input of
         Ok value -> Ok value
-        _       -> Ok ( [], input )
+        _        -> Ok ( [], input )
 
 
 throwAway :: Parser [ String ] -> Parser [ a ]
 {-
-Apply a parser and throw the result away.
+    Apply a parser and throw the result away.
 -}
 throwAway =
-    map ( \ _ -> [] )
+    map ( always [] )
     >> \ parse input ->
         case parse input of
-            Ok ( done, pending )    -> Ok ( [], pending )
-            Err error               -> Err error
+            Ok ( done, pending ) -> Ok ( [], pending )
+            Err error            -> Err error
 
 
 succeed :: a -> Parser a
 {-
-Don't parse anything, just succeed.
+    Don't parse anything, just succeed.
 
-Useful as a `fold` kick-starter for the sequential
-application of parsers.  We could directly use `Ok`
-instead, but this is probably more readable.
+    Useful as a `fold` kick-starter for the sequential
+    application of parsers.  We could directly use `Ok`
+    instead, but this is probably more readable.
 -}
 succeed value input =
     Ok ( value, input )
@@ -74,10 +71,10 @@ succeed value input =
 
 fail :: Parser a
 {-
-Don't parse anything, just fail.
+    Don't parse anything, just fail.
 
-Useful as a `fold` kick-starter for trying out parsers in
-parallel until one succeeds.
+    Useful as a `fold` kick-starter for trying out parsers
+    in parallel until one succeeds.
 -}
 fail input =
     Err ( "", input )
@@ -85,7 +82,7 @@ fail input =
 
 zeroOrMore :: Parser [ a ] -> Parser [ a ]
 {-
-Apply a parser as often as possible.
+    Apply a parser as often as possible.
 -}
 zeroOrMore parse =
     optional ( oneOrMore parse )
@@ -93,7 +90,7 @@ zeroOrMore parse =
 
 oneOrMore :: Parser [ a ] -> Parser [ a ]
 {-
-Apply as often as possible, but at least once.
+    Apply as often as possible, but at least once.
 -}
 oneOrMore parse =
     sequence [ parse, optional ( oneOrMore parse ) ]
@@ -101,7 +98,8 @@ oneOrMore parse =
 
 either :: Parser a -> Parser a -> Parser a
 {-
-Apply the first succeeding parser from two alternatives.
+    Apply the first succeeding parser from two
+    alternatives.
 -}
 either parser1 parser2 input =
     case parser1 input of
@@ -111,7 +109,8 @@ either parser1 parser2 input =
 
 oneOf :: [ Parser a ] -> Parser a
 {-
-Apply the fist succeeding parser from a list of parsers.
+    Apply the fist succeeding parser from a list of
+    parsers.
 -}
 oneOf parsers =
     List.foldr either fail parsers
@@ -119,21 +118,21 @@ oneOf parsers =
 
 succ :: Parser [ a ] -> Parser [ a ] -> Parser [ a ]
 {-
-Apply two parsers, one after the other.
+    Apply two parsers, one after the other.
 -}
 succ parser1 parser2 input =
     case parser1 input of
         Ok ( done1, pending1 ) ->
             case parser2 pending1 of
-                Ok ( done2, pending2 )  -> Ok ( done1 ++ done2, pending2 )
-                error                   -> error
-
+                Ok ( done2, pending2 ) ->
+                    Ok ( done1 ++ done2, pending2 )
+                Err error -> Err error
         error -> error
 
 
 sequence :: [ Parser [ a ] ] -> Parser [ a ]
 {-
-Apply a list of parsers, one after another.
+    Apply a list of parsers, one after another.
 -}
 sequence parsers =
     List.foldr succ ( succeed [] ) parsers
@@ -141,9 +140,9 @@ sequence parsers =
 
 map :: ( a -> b ) -> Parser a -> Parser b
 {-
-Map over a parsing result.
+    Map over a parsing result.
 -}
 map fn parse input =
     case parse input of
-        Ok ( done, pending )    -> Ok ( fn done, pending )
-        Err error               -> Err error
+        Ok ( done, pending ) -> Ok ( fn done, pending )
+        Err error            -> Err error

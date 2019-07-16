@@ -1,4 +1,4 @@
-module Parse.Json where
+module Json.Parse where
 
 import Ulme
 import qualified Ulme.Char as Char
@@ -36,7 +36,8 @@ value =
 
 jatom :: Parser [ String ] -> Parser Json
 jatom =
-    Parse.map ( List.foldr (++) [] >> Jatom )
+    Parse.map
+        ( List.foldr (++) [] >> Jatom )
 
 
 object :: Parser Json
@@ -69,9 +70,9 @@ member =
         , Parse.map List.singleton element
         ]
     >> \ case
-        Err error                   -> Err error
-        Ok ( [ k, v ] , pending )   -> Ok ( ( k, v ), pending )
-        Ok ( values, pending )      -> Err ( show values, pending )
+        Err error                 -> Err error
+        Ok ( [ k, v ] , pending ) -> Ok ( ( k, v ), pending )
+        Ok ( values, pending )    -> Err ( show values, pending )
 
 
 array :: Parser Json
@@ -102,9 +103,9 @@ element =
         , Parse.throwAway whitespace
         ]
     >> \ case
-        Err error               -> Err error
-        Ok ( [ v ] , pending )  -> Ok ( v, pending )
-        Ok ( values, pending )  -> Err ( show values, pending )
+        Err error              -> Err error
+        Ok ( [ v ] , pending ) -> Ok ( v, pending )
+        Ok ( values, pending ) -> Err ( show values, pending )
 
 
 string :: Parser Json
@@ -127,7 +128,6 @@ char input =
             let code = Char.toCode head in
             if code == 34 || code == 92 || code < 32 || code > 1114111
             then error else Ok ( [ String.fromChar head ], tail )
-
         _ -> error
 
 
