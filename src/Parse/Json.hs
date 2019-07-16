@@ -1,11 +1,12 @@
 module Parse.Json where
 
 import Ulme
+import qualified Ulme.Char as Char
+import qualified Ulme.List as List
+import qualified Ulme.String as String
 
 import Parse ( Parser )
 import qualified Parse
-import qualified Ulme.Char as Char
-import qualified Ulme.List as List
 
 
 data Json
@@ -181,23 +182,20 @@ characters  =
     Parse.zeroOrMore character
 
 
+char :: Parser [ String ]
+char input =
+    let error = Err ( "Expect valid char", input ) in
+    case input of
+        ( head : tail ) ->
+            let code = Char.toCode head in
+            if code == 34 || code == 92 || code < 32 || code > 1114111
+            then error else Ok ( [ String.fromChar head ], tail )
+        _ -> error
+
+
 character :: Parser [ String ]
 character =
-    let
-        codes
-            = List.range 32 33
-           ++ List.range 35 91
-           ++ List.range 93 1114111
-
-        chars =
-            codes
-            |> map Char.fromCode
-            |> map Parse.char
-    in
-    Parse.oneOf
-        [ Parse.oneOf chars
-        , Parse.sequence [ Parse.char '\\', escape ]
-        ]
+    Parse.oneOf [ char, Parse.sequence [ Parse.char '\\', escape ] ]
 
 
 escape :: Parser [ String ]
