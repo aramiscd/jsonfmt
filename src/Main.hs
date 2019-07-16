@@ -1,17 +1,21 @@
 module Main ( main ) where
 
 import Ulme
-import Ulme.Result ( Result ( Err, Ok ) )
-
+import qualified Parse.Json as Json
 import qualified System.IO as IO
+import Text.Pretty.Simple ( pPrint )
 
-import Parse.Json
 
+{- TODO
+
+    * Json Strings bremsen enorm.
+
+-}
 
 
 main =
-    json "[1]"
-    |> show
-    |> IO.putStrLn
+    "[1,2,3,4]"
+    |> Json._json
+    |> pPrint
 
 

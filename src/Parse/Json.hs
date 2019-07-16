@@ -1,4 +1,4 @@
-module Parse.Json ( json ) where
+module Parse.Json where
 
 import Ulme
 
@@ -8,12 +8,24 @@ import qualified Ulme.Char as Char
 import qualified Ulme.List as List
 
 
-json :: Parser
+data Json
+    = Jarray [ Json ]
+    | Jatom String
+    | Jobject [ ( Json, Json ) ]
+    deriving Show
+
+
+json :: Parser [ String ]
 json =
     element
 
 
-value :: Parser
+_json :: Parser Json
+_json =
+    _element
+
+
+value :: Parser [ String ]
 value =
     Parse.oneOf
         [ object
@@ -26,7 +38,20 @@ value =
         ]
 
 
-object :: Parser
+_value :: Parser Json
+_value =
+    Parse.oneOf
+        [ _object
+        , _array
+        , _string
+        , _number
+        , _true
+        , _false
+        , _null
+        ]
+
+
+object :: Parser [ String ]
 object =
     Parse.sequence
         [ Parse.char '{'
@@ -35,7 +60,17 @@ object =
         ]
 
 
-members :: Parser
+_object :: Parser Json
+_object =
+    Parse.sequence
+        [ throwAwayPair ( Parse.char '{' )
+        , Parse.oneOf [ _members, throwAwayPair whitespace ]
+        , throwAwayPair ( Parse.char '}' )
+        ]
+    |> Parse.map Jobject
+
+
+members :: Parser [ String ]
 members =
     Parse.sequence
         [ member
@@ -44,13 +79,37 @@ members =
         ]
 
 
-member :: Parser
+_members :: Parser [ ( Json, Json ) ]
+_members =
+    Parse.sequence
+        [ Parse.map List.singleton _member
+        , Parse.optional
+            ( Parse.sequence [ throwAwayPair ( Parse.char ',' ), _members ] )
+        ]
+
+
+member :: Parser [ String ]
 member =
     Parse.sequence
         [ whitespace, string, whitespace, Parse.char ':', element ]
 
 
-array :: Parser
+_member :: Parser ( Json, Json )
+_member =
+    Parse.sequence
+        [ throwAwayList whitespace
+        , Parse.map ( List.foldr (++) "" >> Jatom >> List.singleton ) string
+        , throwAwayList whitespace
+        , throwAwayList ( Parse.char ':' )
+        , Parse.map List.singleton _element
+        ]
+    >> \ case
+        Err error                   -> Err error
+        Ok ( [ k, v ] , pending )   -> Ok ( ( k, v ), pending )
+        Ok ( values, pending )      -> Err ( show values, pending )
+
+
+array :: Parser [ String ]
 array =
     Parse.sequence
         [ Parse.char '['
@@ -59,7 +118,17 @@ array =
         ]
 
 
-elements :: Parser
+_array :: Parser Json
+_array =
+    Parse.sequence
+        [ throwAwayList ( Parse.char '[' )
+        , Parse.oneOf [ _elements, throwAwayList whitespace ]
+        , throwAwayList ( Parse.char ']' )
+        ]
+    |> Parse.map Jarray
+
+
+elements :: Parser [ String ]
 elements =
     Parse.sequence
         [ element
@@ -68,23 +137,51 @@ elements =
         ]
 
 
-element :: Parser
+_elements :: Parser [ Json ]
+_elements =
+    Parse.sequence
+        [ Parse.map List.singleton _element
+        , Parse.optional
+            ( Parse.sequence [ throwAwayList ( Parse.char ',' ), _elements ] )
+        ]
+
+
+element :: Parser [ String ]
 element =
     Parse.sequence [ whitespace, value, whitespace ]
 
 
-string :: Parser
+_element :: Parser Json
+_element =
+    Parse.sequence
+        [ throwAwayList whitespace
+        , Parse.map List.singleton _value
+        , throwAwayList whitespace
+        ]
+    >> \ case
+        Err error               -> Err error
+        Ok ( [ v ] , pending )  -> Ok ( v, pending )
+        Ok ( values, pending )  -> Err ( show values, pending )
+
+
+string :: Parser [ String ]
 string =
-    Parse.merge
-        ( Parse.sequence [ Parse.char '"', characters, Parse.char '"' ] )
+    Parse.sequence [ Parse.char '"', characters, Parse.char '"' ]
+    |> Parse.merge
 
 
-characters :: Parser
+_string :: Parser Json
+_string =
+    Parse.sequence [ Parse.char '"', characters, Parse.char '"' ]
+    |> Parse.map ( List.foldr (++) "" >> Jatom )
+
+
+characters :: Parser [ String ]
 characters  =
     Parse.zeroOrMore character
 
 
-character :: Parser
+character :: Parser [ String ]
 character =
     let
         codes
@@ -103,7 +200,7 @@ character =
         ]
 
 
-escape :: Parser
+escape :: Parser [ String ]
 escape =
     Parse.oneOf
         [ Parse.char '"'
@@ -118,7 +215,7 @@ escape =
         ]
 
 
-hex :: Parser
+hex :: Parser [ String ]
 hex =
     Parse.oneOf
         [ digit
@@ -139,13 +236,19 @@ hex =
         ]
 
 
-number :: Parser
+number :: Parser [ String ]
 number =
-    Parse.merge
-        ( Parse.sequence [ integer, fraction, exponent ] )
+    Parse.sequence [ integer, fraction, exponent ]
+    |> Parse.merge
 
 
-integer :: Parser
+_number :: Parser Json
+_number =
+    Parse.sequence [ integer, fraction, exponent ]
+    |> Parse.map ( List.foldr (++) "" >> Jatom )
+
+
+integer :: Parser [ String ]
 integer =
     Parse.oneOf
         [ Parse.sequence [ onenine, digits ]
@@ -155,17 +258,17 @@ integer =
         ]
 
 
-digits :: Parser
+digits :: Parser [ String ]
 digits =
     Parse.oneOrMore digit
 
 
-digit :: Parser
+digit :: Parser [ String ]
 digit =
     Parse.oneOf [ Parse.char '0', onenine ] 
 
 
-onenine :: Parser
+onenine :: Parser [ String ]
 onenine =
     Parse.oneOf
         [ Parse.char '1'
@@ -180,33 +283,30 @@ onenine =
         ]
 
 
-fraction :: Parser
+fraction :: Parser [ String ]
 fraction =
     Parse.optional
         ( Parse.sequence [ Parse.char '.', digits ] )
 
 
-exponent :: Parser
+exponent :: Parser [ String ]
 exponent =
     Parse.optional
         ( Parse.sequence
-            [ Parse.oneOf
-                [ Parse.char 'E'
-                , Parse.char 'e'
-                ]
+            [ Parse.oneOf [ Parse.char 'E', Parse.char 'e' ]
             , sign
             , digits
             ]
         )
 
 
-sign :: Parser
+sign :: Parser [ String ]
 sign =
     Parse.optional
         ( Parse.oneOf [ Parse.char '+', Parse.char '-' ] )
 
 
-whitespace :: Parser
+whitespace :: Parser [ String ]
 whitespace =
     Parse.zeroOrMore
         ( Parse.oneOf
@@ -216,3 +316,33 @@ whitespace =
             , Parse.char '\x0009'
             ]
         )
+
+
+_true :: Parser Json
+_true =
+    Parse.string "true"
+    |> Parse.map ( List.foldr (++) [] >> Jatom )
+
+
+_false :: Parser Json
+_false =
+    Parse.string "false"
+    |> Parse.map ( List.foldr (++) [] >> Jatom )
+
+
+_null :: Parser Json
+_null =
+    Parse.string "null"
+    |> Parse.map ( List.foldr (++) [] >> Jatom )
+
+
+throwAwayList :: Parser [ String ] -> Parser [ Json ]
+throwAwayList =
+    Parse.map ( \ _ -> [ Jatom "" ] )
+    >> Parse.throwAway
+
+
+throwAwayPair :: Parser [ String ] -> Parser [ ( Json, Json ) ]
+throwAwayPair =
+    Parse.map ( \ _ -> [ ( Jatom "", Jatom "" ) ] )
+    >> Parse.throwAway

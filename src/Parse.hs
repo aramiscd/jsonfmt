@@ -15,6 +15,7 @@ module Parse
     , optional
     , zeroOrMore
     , oneOrMore
+    , throwAway
 
     , map
     , merge
@@ -31,11 +32,11 @@ import qualified Ulme.List as List
 import qualified Ulme.String as String
 
 
-type Parser
-    = String -> Result ( String, String ) ( [ String ], String )
+type Parser a
+    = String -> Result ( String, String ) ( a, String )
 
 
-char :: Char -> Parser
+char :: Char -> Parser [ String ]
 {-
 Parse a single `Char`.
 -}
@@ -50,7 +51,7 @@ char match input =
         _ -> error
 
 
-string :: String -> Parser
+string :: String -> Parser [ String ]
 string match input =
 {-
 Parse a `String`.
@@ -68,7 +69,7 @@ Parse a `String`.
             )
 
 
-succeed :: Parser
+succeed :: a -> Parser a
 {-
 Don't parse anything, just succeed.
 
@@ -76,55 +77,55 @@ Useful as a `fold` kick-starter for the sequential
 application of parsers.  We could directly use `Ok`
 instead, but this is probably more readable.
 -}
-succeed input =
-    Ok ( [], input )
+succeed value input =
+    Ok ( value, input )
 
 
+fail :: Parser a
 {-
 Don't parse anything, just fail.
 
 Useful as a `fold` kick-starter for trying out parsers in
 parallel until one succeeds.
 -}
-fail :: Parser
 fail input =
     Err ( "", input )
 
 
-end :: Parser
+end :: a -> Parser a
 {-
 Succeed on the empty string, fail otherwhise.
 
 Useful as the last parser in a sequence of parsers to make
 sure that there is no remaining input.
 -}
-end input =
-    if input == "" then Ok ( [], "" ) else Err ( "", input )
+end value input =
+    if input == "" then Ok ( value, "" ) else Err ( "", input )
 
 
-succ :: Parser -> Parser -> Parser
+succ :: Parser [ a ] -> Parser [ a ] -> Parser [ a ]
 {-
 Apply two parsers, one after the other.
 -}
 succ parser1 parser2 input =
     case parser1 input of
-        Ok ( done1, todo1 ) ->
-            case parser2 todo1 of
-                Ok ( done2, todo2 ) -> Ok ( done1 ++ done2, todo2 )
-                error -> error
+        Ok ( done1, pending1 ) ->
+            case parser2 pending1 of
+                Ok ( done2, pending2 )  -> Ok ( done1 ++ done2, pending2 )
+                error                   -> error
 
         error -> error
 
 
-sequence :: [ Parser ] -> Parser
+sequence :: [ Parser [ a ] ] -> Parser [ a ]
 {-
 Apply a list of parsers, one after another.
 -}
 sequence parsers =
-    List.foldr succ succeed parsers
+    List.foldr succ ( succeed [] ) parsers
 
 
-either :: Parser -> Parser -> Parser
+either :: Parser a -> Parser a -> Parser a
 {-
 Apply the first succeeding parser from two alternatives.
 -}
@@ -134,7 +135,7 @@ either parser1 parser2 input =
         ok    -> ok
 
 
-oneOf :: [ Parser ] -> Parser
+oneOf :: [ Parser a ] -> Parser a
 {-
 Apply the fist succeeding parser from a list of parsers.
 -}
@@ -142,7 +143,7 @@ oneOf parsers =
     List.foldr either fail parsers
 
 
-optional :: Parser -> Parser
+optional :: Parser [ a ] -> Parser [ a ]
 {-
 Optionally apply a parser.
 -}
@@ -152,7 +153,7 @@ optional parse input =
         _       -> Ok ( [], input )
 
 
-oneOrMore :: Parser -> Parser
+oneOrMore :: Parser [ a ] -> Parser [ a ]
 {-
 Apply as often as possible, but at least once.
 -}
@@ -160,7 +161,7 @@ oneOrMore parse =
     sequence [ parse, optional ( oneOrMore parse ) ]
 
 
-zeroOrMore :: Parser -> Parser
+zeroOrMore :: Parser [ a ] -> Parser [ a ]
 {-
 Apply a parser as often as possible.
 -}
@@ -168,24 +169,25 @@ zeroOrMore parse =
     optional ( oneOrMore parse )
 
 
-map :: ( [ String ] -> [ String ] ) -> Parser -> Parser
+map :: ( a -> b ) -> Parser a -> Parser b
 {-
 Map over a parsing result.
 -}
 map fn parse input =
     case parse input of
-        Ok ( done, todo ) -> Ok ( fn done, todo )
-        Err error         -> Err error
+        Ok ( done, pending )    -> Ok ( fn done, pending )
+        Err error               -> Err error
 
-merge :: Parser -> Parser
+
+merge :: Parser [ [ a ] ] -> Parser [ [ a ] ]
 merge parse input =
-    let do_merge = List.foldr (++) "" >> List.singleton in
+    let do_merge = List.foldr (++) [] >> List.singleton in
     case parse input of
-        Ok ( done, todo ) -> Ok ( do_merge done, todo )
-        Err error         -> Err error
+        Ok ( done, pending )    -> Ok ( do_merge done, pending )
+        Err error               -> Err error
 
 
-whitespace :: Parser
+whitespace :: Parser [ String ]
 {-
 Parse whitespace.
 -}
@@ -200,7 +202,7 @@ whitespace =
         )
 
 
-optWhite :: Parser
+optWhite :: Parser [ String ]
 {-
 Parse optional whitespace.
 -}
@@ -208,7 +210,7 @@ optWhite =
     optional whitespace
 
 
-nonZeroDigit :: Parser
+nonZeroDigit :: Parser [ String ]
 {-
 Parse a non-zero decimal digit 1-9.
 -}
@@ -226,6 +228,16 @@ nonZeroDigit =
         ]
 
 
-digit :: Parser
+digit :: Parser [ String ]
 digit =
     oneOf [ char '0', nonZeroDigit ]
+
+
+throwAway :: Parser [ a ] -> Parser [ a ]
+{-
+Apply a parser and throw the result away.
+-}
+throwAway parse input =
+    case parse input of
+        Ok ( done, pending )    -> Ok ( [], pending )
+        Err error               -> Err error
