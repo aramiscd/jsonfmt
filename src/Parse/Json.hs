@@ -9,8 +9,8 @@ import qualified Ulme.List as List
 
 
 data Json
-    = Jarray [ Json ]
-    | Jatom String
+    = Jatom String
+    | Jarray [ Json ]
     | Jobject [ ( Json, Json ) ]
     deriving Show
 
