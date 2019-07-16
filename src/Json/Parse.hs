@@ -1,5 +1,17 @@
-module Json.Parse where
+{-
+    A JSON-parsing module.
 
+    This module provides a data type for representing
+    JSON documents and a dedicated parser function based
+    on simple parser-combinators.
+-}
+
+module Json.Parse
+    ( Json ( Jatom, Jarray, Jobject )
+    , json
+    )
+where
+    
 import Ulme
 import qualified Ulme.Char as Char
 import qualified Ulme.List as List
@@ -10,6 +22,9 @@ import qualified Parse
 
 
 data Json
+{-
+    A data type for representing JSON Documents.
+-}
     = Jatom String
     | Jarray [ Json ]
     | Jobject [ ( Json, Json ) ]
@@ -17,11 +32,17 @@ data Json
 
 
 json :: Parser Json
+{-
+    Parse an entire JSON document into a `Json` value.
+-}
 json =
     element
 
 
 value :: Parser Json
+{-
+    Parse a JSON value into a `Json` value.
+-}
 value =
     Parse.oneOf
         [ object
@@ -35,12 +56,21 @@ value =
 
 
 jatom :: Parser [ String ] -> Parser Json
+{-
+    Turn a `[ String ]` parser into a `Json` parser that
+    produces a `Jatom`.
+
+    This is basically a type-shim.
+-}
 jatom =
     Parse.map
         ( List.foldr (++) [] >> Jatom )
 
 
 object :: Parser Json
+{-
+    Parse a JSON object into a `Jobject`.
+-}
 object =
     Parse.sequence
         [ Parse.throwAway ( Parse.string "{" )
@@ -51,6 +81,9 @@ object =
 
 
 members :: Parser [ ( Json, Json ) ]
+{-
+    Parse the members of a JSON object.
+-}
 members =
     Parse.sequence
         [ Parse.map List.singleton member
@@ -61,6 +94,9 @@ members =
 
 
 member :: Parser ( Json, Json )
+{-
+    Parse a single member of a JSON object.
+-}
 member =
     Parse.sequence
         [ Parse.throwAway whitespace
@@ -76,6 +112,9 @@ member =
 
 
 array :: Parser Json
+{-
+    Parse a JSON array into a `Jarray`.
+-}
 array =
     Parse.sequence
         [ Parse.throwAway ( Parse.string "[" )
@@ -86,6 +125,9 @@ array =
 
 
 elements :: Parser [ Json ]
+{-
+    Parse the elements of a JSON array.
+-}
 elements =
     Parse.sequence
         [ Parse.map List.singleton element
@@ -96,6 +138,9 @@ elements =
 
 
 element :: Parser Json
+{-
+    Parse a single element of a JSON array.
+-}
 element =
     Parse.sequence
         [ Parse.throwAway whitespace
@@ -109,6 +154,9 @@ element =
 
 
 string :: Parser Json
+{-
+    Parse a JSON string into a `Jatom`.
+-}
 string =
     jatom <|
         Parse.sequence
@@ -116,11 +164,17 @@ string =
 
 
 characters :: Parser [ String ]
+{-
+    Parse any number of characters.
+-}
 characters  =
     Parse.zeroOrMore character
 
 
 char :: Parser [ String ]
+{-
+    Parse a valid unescaped single character.
+-}
 char input =
     let error = Err ( "Expect valid char", input ) in
     case input of
@@ -132,12 +186,18 @@ char input =
 
 
 character :: Parser [ String ]
+{-
+    Parse a valid single character.
+-}
 character =
     Parse.oneOf
         [ char, Parse.sequence [ Parse.string "\\", escape ] ]
 
 
 escape :: Parser [ String ]
+{-
+    Parse an escape character.
+-}
 escape =
     Parse.oneOf
         [ Parse.string "\""
@@ -153,6 +213,9 @@ escape =
 
 
 hex :: Parser [ String ]
+{-
+    Parse a hex digit.
+-}
 hex =
     Parse.oneOf
         [ digit
@@ -174,6 +237,13 @@ hex =
 
 
 number :: Parser Json
+{-
+    Parse a JSON number.
+
+    JSON numbers a either integer or floating-point,
+    with or without a scientific exponential suffix.
+    Only decimal notation is valid; no hex, no octal.
+-}
 number =
     jatom <|
         Parse.sequence
@@ -181,6 +251,12 @@ number =
 
 
 integer :: Parser [ String ]
+{-
+    Parse an integer.
+
+    Only decimal notation, no leading zeros, with or
+    without a leading minus.
+-}
 integer =
     Parse.oneOf
         [ Parse.sequence [ onenine, digits ]
@@ -191,16 +267,25 @@ integer =
 
 
 digits :: Parser [ String ]
+{-
+    Parse any number of decimal digits.
+-}
 digits =
     Parse.oneOrMore digit
 
 
 digit :: Parser [ String ]
+{-
+    Parse a single decimal digit.
+-}
 digit =
     Parse.oneOf [ Parse.string "0", onenine ] 
 
 
 onenine :: Parser [ String ]
+{-
+    Parse a non-zero decimal digit.
+-}
 onenine =
     Parse.oneOf
         [ Parse.string "1"
@@ -216,6 +301,9 @@ onenine =
 
 
 fraction :: Parser [ String ]
+{-
+    Parse the fractional part of a floating-point number.
+-}
 fraction =
     Parse.optional <|
         Parse.sequence
@@ -223,6 +311,10 @@ fraction =
 
 
 exponent :: Parser [ String ]
+{-
+    Parse the scientific exponential suffix of a number
+    (if any).
+-}
 exponent =
     Parse.optional <|
         Parse.sequence
@@ -233,6 +325,11 @@ exponent =
 
 
 sign :: Parser [ String ]
+{-
+    Parse the sign of a scientific exponential suffix.
+
+    This is NOT the optional sign in front JSON number.
+-}
 sign =
     Parse.optional <|
         Parse.oneOf
@@ -240,6 +337,9 @@ sign =
 
 
 whitespace :: Parser [ String ]
+{-
+    Parse whitespace (greedy).
+-}
 whitespace =
     Parse.zeroOrMore <|
         Parse.oneOf

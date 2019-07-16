@@ -1,3 +1,26 @@
+{-
+    A simple parser-combinator module.
+
+    This work is part of my first serious and successful
+    attempt of non-trivial parsing.  It is motivated
+    by this presentation: https://vimeo.com/171704565
+    Parser-combinators are surprisingly accessible.
+
+    The basic idea is to collect tokens as lists of strings
+    using the `string` function and the basic combinators
+    `sequence`, `oneOf`, `optional` and so on.  Out of
+    these token lists you might construct other data using
+    those same combinators and the `map` function, perhaps
+    discarding some tokens using the `throwAway` function.
+
+    For practical reasons, most of the functions in this
+    module rely on the list monad.  You can, of course,
+    parse into any data type, but once you leave the
+    context of the list monad you lose the ability to
+    assemble values from multiple tokens and to pull apart
+    or throw away stuff.
+-}
+
 module Parse
     ( Parser
     , string
@@ -10,7 +33,7 @@ module Parse
     , map
     )
 where
-        
+
 import Ulme hiding ( map )
 import qualified Ulme.List as List
 import qualified Ulme.String as String
@@ -45,9 +68,9 @@ optional parse input =
         _        -> Ok ( [], input )
 
 
-throwAway :: Parser [ String ] -> Parser [ a ]
+throwAway :: Parser [ a ] -> Parser [ b ]
 {-
-    Apply a parser and throw the result away.
+    Apply a parser and throw away the result.
 -}
 throwAway =
     map ( always [] )
@@ -59,11 +82,10 @@ throwAway =
 
 succeed :: a -> Parser a
 {-
-    Don't parse anything, just succeed.
+    Don't consume any input, just succeed with a value.
 
     Useful as a `fold` kick-starter for the sequential
-    application of parsers.  We could directly use `Ok`
-    instead, but this is probably more readable.
+    application of parsers.
 -}
 succeed value input =
     Ok ( value, input )
@@ -71,7 +93,7 @@ succeed value input =
 
 fail :: Parser a
 {-
-    Don't parse anything, just fail.
+    Don't consume any input, just fail.
 
     Useful as a `fold` kick-starter for trying out parsers
     in parallel until one succeeds.
@@ -90,7 +112,7 @@ zeroOrMore parse =
 
 oneOrMore :: Parser [ a ] -> Parser [ a ]
 {-
-    Apply as often as possible, but at least once.
+    Apply a parser as often as possible but at least once.
 -}
 oneOrMore parse =
     sequence [ parse, optional ( oneOrMore parse ) ]
@@ -118,7 +140,7 @@ oneOf parsers =
 
 succ :: Parser [ a ] -> Parser [ a ] -> Parser [ a ]
 {-
-    Apply two parsers, one after the other.
+    Apply two parsers one after the other.
 -}
 succ parser1 parser2 input =
     case parser1 input of
@@ -140,7 +162,7 @@ sequence parsers =
 
 map :: ( a -> b ) -> Parser a -> Parser b
 {-
-    Map over a parsing result.
+    Map over the result of a successful parser.
 -}
 map fn parse input =
     case parse input of
