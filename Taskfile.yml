@@ -11,6 +11,7 @@ vars :
 
   modules :
     src/Parse.hs
+    src/Json.hs
     src/Json/Parse.hs
 
   deps :

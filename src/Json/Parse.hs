@@ -17,18 +17,9 @@ import qualified Ulme.Char as Char
 import qualified Ulme.List as List
 import qualified Ulme.String as String
 
+import Json ( Json ( Jatom, Jarray, Jobject ) )
 import Parse ( Parser )
 import qualified Parse
-
-
-data Json
-{-
-    A data type for representing JSON Documents.
--}
-    = Jatom String
-    | Jarray [ Json ]
-    | Jobject [ ( Json, Json ) ]
-    deriving Show
 
 
 json :: Parser Json
