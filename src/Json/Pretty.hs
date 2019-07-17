@@ -114,5 +114,10 @@ printMember isFirst ( key, value ) =
     |> \ case
         [] -> []
         k : _ ->
-            [ prefix ++ k ++ " :" ]
-            ++ map ( "    " ++ ) ( printValue value )
+            case printValue value of
+                [ line ] ->
+                    [ prefix ++ k ++ " : " ++ line ]
+
+                lines ->
+                    [ prefix ++ k ++ " :" ]
+                    ++ map ( "    " ++ ) lines

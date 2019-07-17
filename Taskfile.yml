@@ -104,7 +104,7 @@ tasks :
 
   run :
     silent  : true
-    cmds    : [ " echo \"[1,2,3,4]\" | {{.build_dir}}/{{.target}} " ]
+    cmds    : [ " echo '{\"foo\":\"bla\"}' | {{.build_dir}}/{{.target}} " ]
 
   install :
     cmds : [ "cp {{.build_dir}}/{{.target}} {{.bin_dir}} " ]
