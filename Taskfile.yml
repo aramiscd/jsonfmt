@@ -8,6 +8,7 @@ vars :
   main_module : src/Main.hs
   target      : jsonfmt
   tests       : tests/tests.hs
+  bin_dir     : ~/.local/bin
 
   modules :
     src/Parse.hs
@@ -104,3 +105,6 @@ tasks :
   run :
     silent  : true
     cmds    : [ " echo \"[1,2,3,4]\" | {{.build_dir}}/{{.target}} " ]
+
+  install :
+    cmds : [ "cp {{.build_dir}}/{{.target}} {{.bin_dir}} " ]
