@@ -78,7 +78,7 @@ throwAway =
     map ( always [] )
     >> \ parse input ->
         case parse input of
-            Ok ( done, pending ) -> Ok ( [], pending )
+            Ok ( _, pending ) -> Ok ( [], pending )
             Err error            -> Err error
 
 

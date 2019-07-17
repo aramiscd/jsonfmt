@@ -31,9 +31,9 @@ json :: Parser Json
 json =
     element
     >> \ case
-        Err error            -> Err error
-        Ok ( done, "" )      -> Ok ( done, "" )
-        Ok ( done, pending ) -> Err ( "Invalid JSON", pending )
+        Err error         -> Err error
+        Ok ( done, "" )   -> Ok ( done, "" )
+        Ok ( _, pending ) -> Err ( "Invalid JSON", pending )
  
         
 

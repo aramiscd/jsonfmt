@@ -1,9 +1,9 @@
 module Main
 
 {-
-    Parse a JSON document into a value of type `Json`,
-    apply a pretty-printer to it and write the resulting
-    string to the standard output.
+    Read a JSON document from stdin, parse it into a
+    `Json` value, apply a pretty-printer to it and write
+    the resulting string to the standard output.
 -}
 
 ( main
@@ -12,7 +12,6 @@ where
 
 
 import Ulme
-import qualified Parse
 
 import qualified Json.Parse as Parse
 import qualified Json.Pretty as Pretty
@@ -23,13 +22,13 @@ import qualified System.IO as IO
 
 main :: IO ()
 main =
-    "[1,2,3,4]"
-    |> Parse.json
-    |> \ case
+    IO.getContents
+    >>= Parse.json
+    >> \ case
         Ok ( json, [] ) ->
             IO.putStrLn ( Pretty.print json )
 
-        Ok ( json, pending ) ->
+        Ok ( _, pending ) ->
             IO.hPutStrLn IO.stderr ( "Invalid JSON: " ++ pending )
             >>> exitWith ( ExitFailure 1 )
 

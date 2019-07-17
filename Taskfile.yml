@@ -6,13 +6,14 @@ vars :
   ghc         : /usr/bin/ghc
   build_dir   : build
   main_module : src/Main.hs
-  target      : myExecutable
+  target      : jsonfmt
   tests       : tests/tests.hs
 
   modules :
     src/Parse.hs
     src/Json.hs
     src/Json/Parse.hs
+    src/Json/Pretty.hs
 
   deps :
     deps/aramiscd/haskell-ulme/src/Ulme.hs
@@ -33,6 +34,7 @@ vars :
     -Werror
     -Weverything
     -Wno-missing-import-lists
+    -Wno-missing-local-signatures
     -Wno-monomorphism-restriction
     -Wno-redundant-constraints
     -Wno-safe
@@ -47,7 +49,6 @@ vars :
     -O0
     -Wno-missing-exported-signatures
     -Wno-missing-export-lists
-    -Wno-missing-local-signatures
     -Wno-missing-signatures
     -Wno-unsafe
     -Wno-unused-imports
@@ -102,4 +103,4 @@ tasks :
 
   run :
     silent  : true
-    cmds    : [ " {{.build_dir}}/{{.target}} " ]
+    cmds    : [ " echo \"[1,2,3,4]\" | {{.build_dir}}/{{.target}} " ]
