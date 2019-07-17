@@ -1,3 +1,5 @@
+module Json.Parse
+
 {-
     A JSON-parsing module.
 
@@ -6,12 +8,12 @@
     on simple parser-combinators.
 -}
 
-module Json.Parse
-    ( Json ( Jatom, Jarray, Jobject )
-    , json
-    )
+( Json ( Jatom, Jarray, Jobject )
+, json
+)
 where
-    
+
+
 import Ulme
 import qualified Ulme.Char as Char
 import qualified Ulme.List as List
@@ -28,6 +30,12 @@ json :: Parser Json
 -}
 json =
     element
+    >> \ case
+        Err error            -> Err error
+        Ok ( done, "" )      -> Ok ( done, "" )
+        Ok ( done, pending ) -> Err ( "Invalid JSON", pending )
+ 
+        
 
 
 value :: Parser Json

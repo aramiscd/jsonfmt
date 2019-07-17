@@ -1,12 +1,14 @@
+module Json
+
 {-
     This module provides the `Json` data type: a simple,
     well-typed Haskell-representation of JSON documents.
 -}
 
-module Json
-    ( Json ( Jatom, Jarray, Jobject )
-    )
+( Json ( Jatom, Jarray, Jobject )
+)
 where
+
 
 import Ulme
 

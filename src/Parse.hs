@@ -1,3 +1,5 @@
+module Parse
+
 {-
     A simple parser-combinator module.
 
@@ -21,18 +23,18 @@
     or throw away stuff.
 -}
 
-module Parse
-    ( Parser
-    , string
-    , optional
-    , throwAway
-    , zeroOrMore
-    , oneOrMore
-    , oneOf
-    , sequence
-    , map
-    )
+( Parser
+, string
+, optional
+, throwAway
+, zeroOrMore
+, oneOrMore
+, oneOf
+, sequence
+, map
+)
 where
+
 
 import Ulme hiding ( map )
 import qualified Ulme.List as List
