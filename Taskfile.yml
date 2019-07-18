@@ -107,4 +107,4 @@ tasks :
     cmds    : [ " echo '{\"foo\":\"bla\"}' | {{.build_dir}}/{{.target}} " ]
 
   install :
-    cmds : [ "cp {{.build_dir}}/{{.target}} {{.bin_dir}} " ]
+    cmds : [ " cp {{.build_dir}}/{{.target}} {{.bin_dir}} " ]
