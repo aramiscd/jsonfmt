@@ -9,25 +9,26 @@ vars :
   target      : jsonfmt
   tests       : tests/tests.hs
   bin_dir     : ~/.local/bin
+  deps_dir    : deps
 
   modules :
-    src/Parse.hs
-    src/Json.hs
-    src/Json/Parse.hs
-    src/Json/Pretty.hs
+    ./src/Parse.hs
+    ./src/Json.hs
+    ./src/Json/Parse.hs
+    ./src/Json/Pretty.hs
 
   deps :
-    deps/aramiscd/haskell-ulme/src/Ulme.hs
-    deps/aramiscd/haskell-ulme/src/Ulme/Basics.hs
-    deps/aramiscd/haskell-ulme/src/Ulme/Char.hs
-    deps/aramiscd/haskell-ulme/src/Ulme/Dict.hs
-    deps/aramiscd/haskell-ulme/src/Ulme/List.hs
-    deps/aramiscd/haskell-ulme/src/Ulme/Log.hs
-    deps/aramiscd/haskell-ulme/src/Ulme/Maybe.hs
-    deps/aramiscd/haskell-ulme/src/Ulme/Result.hs
-    deps/aramiscd/haskell-ulme/src/Ulme/Set.hs
-    deps/aramiscd/haskell-ulme/src/Ulme/String.hs
-    deps/aramiscd/haskell-ulme/src/Ulme/Tuple.hs
+    ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme.hs
+    ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme/Basics.hs
+    ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme/Char.hs
+    ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme/Dict.hs
+    ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme/List.hs
+    ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme/Log.hs
+    ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme/Maybe.hs
+    ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme/Result.hs
+    ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme/Set.hs
+    ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme/String.hs
+    ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme/Tuple.hs
 
   ghc_args :
     -hidir {{.build_dir}}
@@ -62,8 +63,9 @@ vars :
 tasks :
   setup :
     cmds :
-      [ " if [ ! -d deps/aramiscd/haskell-ulme ]; then
-          git clone git@eee.ygg:haskell-ulme deps/aramiscd/haskell-ulme;
+      [ " if [ ! -d {{.deps_dir}}/aramiscd/haskell-ulme ]; then
+            git clone git@eee.ygg:haskell-ulme
+                {{.deps_dir}}/aramiscd/haskell-ulme;
           fi
         "
       ]
@@ -103,8 +105,19 @@ tasks :
       ]
 
   run :
-    silent  : true
-    cmds    : [ " echo '{\"foo\":\"bla\"}' | {{.build_dir}}/{{.target}} " ]
+    silent : true
+    cmds :
+      [ " echo '{\"foo\":\"bla\",\"fooo\":\"bla\",\"foooo\":\"bla\"
+                ,\"fooooo\":\"bla\",\"foo\":\"bla\",\"foo\":\"bla\"
+                ,\"foo\":\"bla\",\"foo\":\"bla\"}'
+        | {{.build_dir}}/{{.target}} "
+      ]
 
   install :
     cmds : [ " cp {{.build_dir}}/{{.target}} {{.bin_dir}} " ]
+
+  clean :
+    cmds : [ " rm -rf {{.build_dir}} " ]
+
+  clean-all :
+      cmds : [ " rm -rf {{.build_dir}} {{.deps_dir}} " ]
