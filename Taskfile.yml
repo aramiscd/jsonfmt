@@ -3,13 +3,13 @@
 version : 2
 
 vars :
-  ghc         : /usr/bin/ghc
-  build_dir   : build
   main_module : src/Main.hs
   target      : jsonfmt
   tests       : tests/tests.hs
-  bin_dir     : ~/.local/bin
   deps_dir    : deps
+  bin_dir     : ~/.local/bin
+  build_dir   : build
+  ghc         : /usr/bin/ghc
 
   modules :
     ./src/Parse.hs
