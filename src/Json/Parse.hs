@@ -3,9 +3,8 @@ module Json.Parse
 {-
     A JSON-parsing module.
 
-    This module provides a data type for representing
-    JSON documents and a dedicated parser function based
-    on simple parser-combinators.
+    This module provides a parser function for JSON
+    documents, based on simple parser-combinators.
 -}
 
 ( Json ( Jatom, Jarray, Jobject )
@@ -88,7 +87,9 @@ members =
         [ Parse.map List.singleton member
         , Parse.optional <|
             Parse.sequence
-                [ Parse.throwAway ( Parse.string "," ), members ]
+                [ Parse.throwAway ( Parse.string "," )
+                , members
+                ]
         ]
 
 
