@@ -7,20 +7,22 @@ module Json.Parse
     documents, based on simple parser-combinators.
 -}
 
-( Json ( Jatom, Jarray, Jobject )
+( Json ( Jatom , Jarray , Jobject )
 , json
 )
 where
 
 
 import Ulme
-import qualified Ulme.Char as Char
-import qualified Ulme.List as List
-import qualified Ulme.String as String
 
-import Json ( Json ( Jatom, Jarray, Jobject ) )
-import Parse ( Parser )
+import qualified Ulme.Char      as Char
+import qualified Ulme.List      as List
+import qualified Ulme.String    as String
+
 import qualified Parse
+
+import Json     ( Json ( Jatom , Jarray , Jobject ) )
+import Parse    ( Parser )
 
 
 json :: Parser Json
@@ -30,9 +32,9 @@ json :: Parser Json
 json =
     element
     >> \ case
-        Err error         -> Err error
-        Ok ( done, "" )   -> Ok ( done, "" )
-        Ok ( _, pending ) -> Err ( "Invalid JSON", pending )
+        Err error           -> Err error
+        Ok ( done , "" )    -> Ok ( done , "" )
+        Ok ( _ , pending )  -> Err ( "Invalid JSON" , pending )
  
         
 
@@ -61,8 +63,7 @@ jatom :: Parser [ String ] -> Parser Json
     This is basically a type-shim.
 -}
 jatom =
-    Parse.map
-        ( List.foldr (++) [] >> Jatom )
+    Parse.map ( List.foldr (++) [] >> Jatom )
 
 
 object :: Parser Json
@@ -72,13 +73,13 @@ object :: Parser Json
 object =
     Parse.sequence
         [ Parse.throwAway ( Parse.string "{" )
-        , Parse.oneOf [ members, Parse.throwAway whitespace ]
+        , Parse.oneOf [ members , Parse.throwAway whitespace ]
         , Parse.throwAway ( Parse.string "}" )
         ]
     |> Parse.map Jobject
 
 
-members :: Parser [ ( Json, Json ) ]
+members :: Parser [ ( Json , Json ) ]
 {-
     Parse the members of a JSON object.
 -}
@@ -93,7 +94,7 @@ members =
         ]
 
 
-member :: Parser ( Json, Json )
+member :: Parser ( Json , Json )
 {-
     Parse a single member of a JSON object.
 -}
@@ -106,9 +107,9 @@ member =
         , Parse.map List.singleton element
         ]
     >> \ case
-        Err error                 -> Err error
-        Ok ( [ k, v ] , pending ) -> Ok ( ( k, v ), pending )
-        Ok ( values, pending )    -> Err ( show values, pending )
+        Err error                   -> Err error
+        Ok ( [ k , v ] , pending )  -> Ok ( ( k, v ), pending )
+        Ok ( values, pending )      -> Err ( show values , pending )
 
 
 array :: Parser Json
@@ -118,7 +119,7 @@ array :: Parser Json
 array =
     Parse.sequence
         [ Parse.throwAway ( Parse.string "[" )
-        , Parse.oneOf [ elements, Parse.throwAway whitespace ]
+        , Parse.oneOf [ elements , Parse.throwAway whitespace ]
         , Parse.throwAway ( Parse.string "]" )
         ]
     |> Parse.map Jarray
@@ -133,7 +134,7 @@ elements =
         [ Parse.map List.singleton element
         , Parse.optional <|
             Parse.sequence
-                [ Parse.throwAway ( Parse.string "," ), elements ]
+                [ Parse.throwAway ( Parse.string "," ) , elements ]
         ]
 
 
@@ -148,9 +149,9 @@ element =
         , Parse.throwAway whitespace
         ]
     >> \ case
-        Err error              -> Err error
-        Ok ( [ v ] , pending ) -> Ok ( v, pending )
-        Ok ( values, pending ) -> Err ( show values, pending )
+        Err error               -> Err error
+        Ok ( [ v ] , pending )  -> Ok ( v , pending )
+        Ok ( values , pending ) -> Err ( show values , pending )
 
 
 string :: Parser Json
@@ -158,9 +159,9 @@ string :: Parser Json
     Parse a JSON string into a `Jatom`.
 -}
 string =
-    jatom <|
-        Parse.sequence
-            [ Parse.string "\"", characters, Parse.string "\"" ]
+    Parse.sequence
+        [ Parse.string "\"" , characters , Parse.string "\"" ]
+    |> jatom
 
 
 characters :: Parser [ String ]
@@ -176,13 +177,18 @@ char :: Parser [ String ]
     Parse a valid unescaped single character.
 -}
 char input =
-    let error = Err ( "Expect valid char", input ) in
-    case input of
-        ( head : tail ) ->
-            let code = Char.toCode head in
-            if code == 34 || code == 92 || code < 32 || code > 1114111
-            then error else Ok ( [ String.fromChar head ], tail )
-        _ -> error
+    let
+        error = Err ( "Expect valid char" , input )
+    in
+        case input of
+            ( head : tail ) ->
+                let
+                    c = Char.toCode head
+                in
+                    if c == 34 || c == 92 || c < 32 || c > 1114111
+                    then error
+                    else Ok ( [ String.fromChar head ] , tail )
+            [] -> error
 
 
 character :: Parser [ String ]
@@ -191,7 +197,7 @@ character :: Parser [ String ]
 -}
 character =
     Parse.oneOf
-        [ char, Parse.sequence [ Parse.string "\\", escape ] ]
+        [ char , Parse.sequence [ Parse.string "\\" , escape ] ]
 
 
 escape :: Parser [ String ]
@@ -208,7 +214,7 @@ escape =
         , Parse.string "n"
         , Parse.string "r"
         , Parse.string "t"
-        , Parse.sequence [ Parse.string "u", hex, hex, hex, hex ]
+        , Parse.sequence [ Parse.string "u" , hex , hex , hex , hex ]
         ]
 
 
@@ -240,14 +246,13 @@ number :: Parser Json
 {-
     Parse a JSON number.
 
-    JSON numbers a either integer or floating-point,
+    JSON numbers are either integer or floating-point,
     with or without a scientific exponential suffix.
     Only decimal notation is valid; no hex, no octal.
 -}
 number =
-    jatom <|
-        Parse.sequence
-            [ integer, fraction, exponent ]
+    Parse.sequence [ integer , fraction , exponent ]
+    |> jatom
 
 
 integer :: Parser [ String ]
@@ -259,10 +264,10 @@ integer :: Parser [ String ]
 -}
 integer =
     Parse.oneOf
-        [ Parse.sequence [ onenine, digits ]
+        [ Parse.sequence [ onenine , digits ]
         , digit
-        , Parse.sequence [ Parse.string "-", onenine, digits ]
-        , Parse.sequence [ Parse.string "-", digit ]
+        , Parse.sequence [ Parse.string "-" , onenine , digits ]
+        , Parse.sequence [ Parse.string "-" , digit ]
         ]
 
 
@@ -279,7 +284,7 @@ digit :: Parser [ String ]
     Parse a single decimal digit.
 -}
 digit =
-    Parse.oneOf [ Parse.string "0", onenine ] 
+    Parse.oneOf [ Parse.string "0" , onenine ] 
 
 
 onenine :: Parser [ String ]
@@ -306,8 +311,7 @@ fraction :: Parser [ String ]
 -}
 fraction =
     Parse.optional <|
-        Parse.sequence
-            [ Parse.string ".", digits ]
+        Parse.sequence [ Parse.string "." , digits ]
 
 
 exponent :: Parser [ String ]
@@ -318,7 +322,7 @@ exponent :: Parser [ String ]
 exponent =
     Parse.optional <|
         Parse.sequence
-            [ Parse.oneOf [ Parse.string "E", Parse.string "e" ]
+            [ Parse.oneOf [ Parse.string "E" , Parse.string "e" ]
             , sign
             , digits
             ]
@@ -328,12 +332,12 @@ sign :: Parser [ String ]
 {-
     Parse the sign of a scientific exponential suffix.
 
-    This is NOT the optional sign in front JSON number.
+    This is NOT the optional sign in front of a JSON
+    number.
 -}
 sign =
     Parse.optional <|
-        Parse.oneOf
-            [ Parse.string "+", Parse.string "-" ]
+        Parse.oneOf [ Parse.string "+" , Parse.string "-" ]
 
 
 whitespace :: Parser [ String ]

@@ -5,7 +5,7 @@ module Json
     well-typed Haskell-representation of JSON documents.
 -}
 
-( Json ( Jatom, Jarray, Jobject )
+( Json ( Jatom , Jarray , Jobject )
 )
 where
 
@@ -19,5 +19,5 @@ data Json
 -}
     = Jatom String
     | Jarray [ Json ]
-    | Jobject [ ( Json, Json ) ]
+    | Jobject [ ( Json , Json ) ]
     deriving Show

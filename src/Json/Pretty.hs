@@ -15,17 +15,17 @@ module Json.Pretty
         outlines lists and similar structures with commas
         as prefixes:
 
-            [ foo
-            , bar
-            , baz
-            ]
+        |   [ foo
+        |   , bar
+        |   , baz
+        |   ]
 
         instead of:
 
-            [ foo,
-              bar,
-              baz
-            ]
+        |   [ foo,
+        |     bar,
+        |     baz
+        |   ]
 
         I prefer the former style and would like to apply
         it to JSON documents.  To my best knowledge, no
@@ -45,39 +45,43 @@ where
 
 
 import Ulme
-import qualified Ulme.String as String
 
-import Json ( Json ( Jatom, Jarray, Jobject ) )
+import qualified Ulme.String    as String
+
+import Json ( Json ( Jatom , Jarray , Jobject ) )
 
 
 print :: Json -> String
 {-
     Pretty-print a JSON value.
 -}
-print =
-    printValue >> String.join "\n"
+print value =
+    printValue value
+    |> String.join "\n"
 
 
 printValue :: Json -> [ String ]
 {-
-    Pretty-print a JSON value as a list strings.
+    Pretty-print a JSON value as a list of strings.
 -}
-printValue = \ case
-    Jatom atom      -> [ atom ]
-    Jarray elements -> printArray elements
-    Jobject members -> printObject members
+printValue value =
+    case value of
+        Jatom atom      -> [ atom ]
+        Jarray elements -> printArray elements
+        Jobject members -> printObject members
 
 
 printArray :: [ Json ] -> [ String ]
 {-
     Pretty-print a JSON array as a list of strings.
 -}
-printArray = \ case
-    [] -> [ "[]" ]
-    firstElement : elements ->
-        printElement True firstElement
-        ++ ( elements >>= printElement False )
-        ++ [ "]" ]
+printArray array =
+    case array of
+        [] -> [ "[]" ]
+        firstElement : elements ->
+            printElement True firstElement
+            ++ ( elements |> andThen ( printElement False ) )
+            ++ [ "]" ]
 
 
 printElement :: Bool -> Json -> [ String ]
@@ -85,39 +89,44 @@ printElement :: Bool -> Json -> [ String ]
     Pretty-print a JSON array element as a list of strings.
 -}
 printElement isFirst element =
-    let prefix = if isFirst then "[ " else  ", " in
-    printValue element |> \ case
-        [] -> []
-        firstLine : lines ->
-            [ prefix ++ firstLine ] ++ map ( "  " ++ ) lines
+    let
+        prefix = if isFirst then "[ " else  ", "
+    in
+        printValue element
+        |> \ case
+            [] -> []
+            firstLine : lines ->
+                [ prefix ++ firstLine ] ++ map ( "  " ++ ) lines
 
 
-printObject :: [ ( Json, Json ) ] -> [ String ]
+printObject :: [ ( Json , Json ) ] -> [ String ]
 {-
     Pretty-print a JSON object as a list of strings.
 -}
-printObject = \ case
-    [] -> [ "{}" ]
-    firstMember : members ->
-        printMember True firstMember
-        ++ ( members >>= printMember False )
-        ++ [ "}" ]
+printObject object =
+    case object of
+        [] -> [ "{}" ]
+        firstMember : members ->
+            printMember True firstMember
+            ++ ( members >>= printMember False )
+            ++ [ "}" ]
 
 
-printMember :: Bool -> ( Json, Json ) -> [ String ]
+printMember :: Bool -> ( Json , Json ) -> [ String ]
 {-
     Pretty-print a JSON object member as a list of strings.
 -}
-printMember isFirst ( key, value ) =
-    let prefix = if isFirst then "{ " else  ", " in
-    printValue key
-    |> \ case
-        [] -> []
-        k : _ ->
-            case printValue value of
-                [ line ] ->
-                    [ prefix ++ k ++ " : " ++ line ]
-
-                lines ->
-                    [ prefix ++ k ++ " :" ]
-                    ++ map ( "    " ++ ) lines
+printMember isFirst ( key , value ) =
+    let
+        prefix = if isFirst then "{ " else  ", "
+    in
+        printValue key
+        |> \ case
+            [] -> []
+            k : _ ->
+                case printValue value of
+                    [ line ] ->
+                        [ prefix ++ k ++ " : " ++ line ]
+                    lines ->
+                        [ prefix ++ k ++ " :" ]
+                        ++ map ( "    " ++ ) lines

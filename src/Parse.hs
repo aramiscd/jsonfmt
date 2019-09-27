@@ -3,24 +3,23 @@ module Parse
 {-
     A simple parser-combinator module.
 
-    This work is part of my first serious and successful
-    attempt of non-trivial parsing.  It is motivated
-    by this presentation: https://vimeo.com/171704565
+    This work is part of my first attempt at non-trivial
+    parsing.  It is motivated by this presentation:
+    https://vimeo.com/171704565
+
     Parser-combinators are surprisingly accessible.
 
-    The basic idea is to collect tokens as lists of strings
-    using the `string` function and the basic combinators
-    `sequence`, `oneOf`, `optional` and so on.  Out of
-    these token lists you might construct other data using
-    those same combinators and the `map` function, perhaps
-    discarding some tokens using the `throwAway` function.
+    First, we collect tokens as lists of strings using the
+    `string` function and some basic parsers.  From these
+    tokens we can construct other data using those same
+    combinators and the `map` function, perhaps discarding
+    tokens using the `throwAway` function.
 
-    For practical reasons, most of the functions in this
-    module rely on the list monad.  You can, of course,
-    parse into any data type, but once you leave the
-    context of the list monad you lose the ability to
-    assemble values from multiple tokens and to pull apart
-    or throw away stuff.
+    For practical reasons most functions in this module
+    rely on lists.  We can, of course, parse into any data
+    type, but once we leave the monadic context of a list,
+    we lose the ability to assemble values from multiple
+    tokens and to pull apart or throw away values.
 -}
 
 ( Parser
@@ -37,12 +36,16 @@ where
 
 
 import Ulme hiding ( map )
-import qualified Ulme.List as List
-import qualified Ulme.String as String
+
+import qualified Ulme.List      as List
+import qualified Ulme.String    as String
 
 
 type Parser a
-    = String -> Result ( String, String ) ( a, String )
+{-
+    A parser type.
+-}
+    = String -> Result ( String , String ) ( a , String )
 
 
 string :: String -> Parser [ String ]
@@ -50,14 +53,15 @@ string :: String -> Parser [ String ]
     Parse a `String`.
 -}
 string match input =
-    if String.startsWith match input
+    if
+        String.startsWith match input
     then
         Ok
             ( [ match ]
             , String.dropLeft ( String.length match ) input
             )
     else
-        Err ( match, input )
+        Err ( match , input )
 
 
 optional :: Parser [ a ] -> Parser [ a ]
@@ -66,8 +70,8 @@ optional :: Parser [ a ] -> Parser [ a ]
 -}
 optional parse input =
     case parse input of
-        Ok value -> Ok value
-        _        -> Ok ( [], input )
+        Ok value    -> Ok value
+        _           -> Ok ( [] , input )
 
 
 throwAway :: Parser [ a ] -> Parser [ b ]
@@ -78,8 +82,8 @@ throwAway =
     map ( always [] )
     >> \ parse input ->
         case parse input of
-            Ok ( _, pending ) -> Ok ( [], pending )
-            Err error            -> Err error
+            Ok ( _ , pending )  -> Ok ( [] , pending )
+            Err error           -> Err error
 
 
 succeed :: a -> Parser a
@@ -90,7 +94,7 @@ succeed :: a -> Parser a
     application of parsers.
 -}
 succeed value input =
-    Ok ( value, input )
+    Ok ( value , input )
 
 
 fail :: Parser a
@@ -101,7 +105,7 @@ fail :: Parser a
     in parallel until one succeeds.
 -}
 fail input =
-    Err ( "", input )
+    Err ( "" , input )
 
 
 zeroOrMore :: Parser [ a ] -> Parser [ a ]
@@ -117,7 +121,7 @@ oneOrMore :: Parser [ a ] -> Parser [ a ]
     Apply a parser as often as possible but at least once.
 -}
 oneOrMore parse =
-    sequence [ parse, optional ( oneOrMore parse ) ]
+    sequence [ parse , optional ( oneOrMore parse ) ]
 
 
 either :: Parser a -> Parser a -> Parser a
@@ -127,8 +131,8 @@ either :: Parser a -> Parser a -> Parser a
 -}
 either parser1 parser2 input =
     case parser1 input of
-        Err _ -> parser2 input
-        ok    -> ok
+        Ok value    -> Ok value
+        Err _       -> parser2 input
 
 
 oneOf :: [ Parser a ] -> Parser a
@@ -146,12 +150,12 @@ succ :: Parser [ a ] -> Parser [ a ] -> Parser [ a ]
 -}
 succ parser1 parser2 input =
     case parser1 input of
-        Ok ( done1, pending1 ) ->
+        Ok ( done1 , pending1 ) ->
             case parser2 pending1 of
-                Ok ( done2, pending2 ) ->
-                    Ok ( done1 ++ done2, pending2 )
+                Ok ( done2 , pending2 ) ->
+                    Ok ( done1 ++ done2 , pending2 )
                 Err error -> Err error
-        error -> error
+        Err error -> Err error
 
 
 sequence :: [ Parser [ a ] ] -> Parser [ a ]
@@ -168,5 +172,5 @@ map :: ( a -> b ) -> Parser a -> Parser b
 -}
 map fn parse input =
     case parse input of
-        Ok ( done, pending ) -> Ok ( fn done, pending )
-        Err error            -> Err error
+        Ok ( done , pending )   -> Ok ( fn done , pending )
+        Err error               -> Err error
