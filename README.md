@@ -97,8 +97,9 @@ setlocal tabstop=2
 
 ### Kakoune
 
-This allows you to set filetype-specific options in a file
-under `~/.config/kak/filetype/`:
+Putting the following snippet in your `kakrc` allows
+you to set filetype-specific options in a file under
+`~/.config/kak/filetype/`:
 
 ```
 # ~/.config/kak/kakrc
@@ -117,7 +118,9 @@ is associated with the current buffer, do this:
 :echo %opt{filetype}
 ```
 
-Finally, set the code formatter for JSON to `jsonfmt`:
+With the above snippet in your `kakrc` you
+can set your json formatter to `jsonfmt` in
+`~/.config/kak/filetype/json.kak`:
 
 ```
 # ~/.config/kak/filetype/json.kak
