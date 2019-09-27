@@ -12,10 +12,11 @@ vars :
   ghc         : /usr/bin/ghc
 
   modules :
-    ./src/Parse.hs
+    ./src/IO.hs
     ./src/Json.hs
     ./src/Json/Parse.hs
     ./src/Json/Pretty.hs
+    ./src/Parse.hs
 
   deps :
     ./{{.deps_dir}}/aramiscd/haskell-ulme/src/Ulme.hs
@@ -72,7 +73,7 @@ tasks :
     
   build :
     cmds :
-      [ " mkdir -p ./build/ "
+      [ " mkdir -p {{.build_dir}} "
       , " {{.ghc}} {{.ghc_args}} {{.main_module}}
           {{.modules}} {{.deps}} -o {{.build_dir}}/{{.target}}
         "
@@ -80,15 +81,15 @@ tasks :
 
   build-dev :
     cmds :
-      [ " mkdir -p ./build/ "
+      [ " mkdir -p {{.build_dir}} "
       , " {{.ghc}} {{.ghc_args}} {{.ghc_dev_args}} {{.main_module}}
           {{.modules}} {{.deps}} -o {{.build_dir}}/{{.target}}
         "
       ]
 
   watch :
-    silent  : true
-    cmds    :
+    silent : true
+    cmds :
       [ " while true
         ; do inotifywait -e modify -q -r src
         ; task build-dev && clear && task run

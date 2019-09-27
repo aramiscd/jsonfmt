@@ -13,25 +13,32 @@ where
 
 import Ulme
 
-import qualified Json.Parse as Parse
-import qualified Json.Pretty as Pretty
+import qualified Json.Parse     as Parse
+import qualified Json.Pretty    as Pretty
 
-import System.Exit ( ExitCode ( ExitFailure ), exitWith )
-import qualified System.IO as IO
+import IO
+import System.Exit ( ExitCode ( ExitFailure ) , exitWith )
 
 
 main :: IO ()
 main =
-    IO.getContents
-    >>= Parse.json
-    >> \ case
-        Ok ( json, [] ) ->
-            IO.putStrLn ( Pretty.print json )
+    IO.getContents IO.stdin
+    |> andThen
+        ( \ case
+            Ok contents ->
+                case Parse.json contents of
+                    Ok ( json , [] ) ->
+                        IO.println ( Pretty.print json )
 
-        Ok ( _, pending ) ->
-            IO.hPutStrLn IO.stderr ( "Invalid JSON: " ++ pending )
-            >>> exitWith ( ExitFailure 1 )
+                    Ok ( _ , pending ) ->
+                        IO.printErr ( "Invalid JSON: " ++ pending )
+                        >>> exitWith ( ExitFailure 1 )
 
-        Err error ->
-            IO.hPutStrLn IO.stderr ( show error )
-            >>> exitWith ( ExitFailure 1 )
+                    Err error ->
+                        IO.printErr ( show error )
+                        >>> exitWith ( ExitFailure 1 )
+
+            Err error ->
+                IO.printErr ( show error )
+                >>> exitWith ( ExitFailure 1 )
+        )
