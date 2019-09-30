@@ -30,7 +30,7 @@ into this:
 
 ## Installation
 
-Download jsonfmt and put it in your `$PATH`.
+Put it in your `$PATH`.
 
 
 ## Usage
