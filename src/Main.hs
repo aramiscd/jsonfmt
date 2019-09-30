@@ -13,11 +13,12 @@ where
 
 import Ulme
 
+import qualified Ulme.IO        as IO
+
 import qualified Json.Parse     as Parse
 import qualified Json.Pretty    as Pretty
 
-import IO
-import System.Exit ( ExitCode ( ExitFailure ) , exitWith )
+import System.Exit  ( ExitCode ( ExitFailure ) , exitWith )
 
 
 main :: IO ()
