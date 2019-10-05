@@ -33,9 +33,9 @@ into this:
 I'd like to provide a fully statically linked linux binary,
 but I haven't yet figured out how create that from Haskell
 sources.  For now there is just a provisional install
-script for Ubuntu 18.04.  It will attempt to build jsonfmt
-and copy it to `~/.local/bin/`.  It will not touch your
-`$PATH`.
+script for Ubuntu 18.04 and 19.04.  It will attempt to
+build jsonfmt and copy it to `~/.local/bin/`.  It will
+not touch your `$PATH`.
 
 ```bash
 sudo apt install -y curl
