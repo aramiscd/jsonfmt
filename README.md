@@ -48,13 +48,8 @@ curl -L https://git.sr.ht/~aramis/jsonfmt/blob/master/install.sh | sh
 
 ## Usage
 
-### Vim/Neovim
+In Vim/Neovim  kype `:%!jsonfmt` and hit `Return` to format
+a JSON document.
 
-Type `:%!jsonfmt` and hit `return` to format a JSON
-document.
-
-
-### Kakoune
-
-Type `%|jsonfmt` and hit `return` to format a JSON
-document.
+In Kakoune type `%|jsonfmt` and hit `Return` to format a
+JSON document.
