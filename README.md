@@ -30,7 +30,10 @@ into this:
 
 ## Installation
 
-Put it in your `$PATH`.
+I'd like to provide a fully statically linked linux binary,
+but I haven't yet figured out how create that from Haskell
+sources.  For now there is just a provisional install
+script for Ubuntu 18.04.
 
 
 ## Usage
