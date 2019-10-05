@@ -1,6 +1,6 @@
 # jsonfmt
 
-A simple JSON pretty printer, inspired by
+An experimental JSON pretty printer, inspired by
 [elm-format](https://github.com/avh4/elm-format), written
 in Haskell.
 
