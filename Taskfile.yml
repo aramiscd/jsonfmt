@@ -112,10 +112,16 @@ tasks :
       ]
 
   install :
-    cmds : [ " cp {{.build_dir}}/{{.target}} {{.bin_dir}} " ]
+    cmds :
+      [ " mkdir -p {{.bin_dir}} "
+      , " cp {{.build_dir}}/{{.target}} {{.bin_dir}} "
+      ]
 
   clean :
-    cmds : [ " rm -rf {{.build_dir}} " ]
+    cmds :
+      [ " rm -rf {{.build_dir}} " ]
 
   clean-all :
-      cmds : [ " rm -rf {{.build_dir}} {{.deps_dir}} " ]
+    cmds :
+      [ " rm -rf {{.build_dir}} {{.deps_dir}} "
+      ]
