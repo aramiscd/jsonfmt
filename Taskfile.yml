@@ -63,14 +63,8 @@ vars :
 tasks :
   setup :
     cmds :
-      [ " if [ ! -d {{.deps_dir}}/aramiscd/ulme ]
-        ; then git clone git@eee.ygg:ulme {{.deps_dir}}/aramiscd/ulme
-        ; fi
-        "
-      , " if [ ! -d {{.deps_dir}}/aramiscd/ulme-io ]
-        ; then git clone git@eee.ygg:ulme-io {{.deps_dir}}/aramiscd/ulme-io
-        ; fi
-        "
+      [ " if [ ! -d {{.deps_dir}}/aramiscd/ulme ] ; then git clone https://git.sr.ht/~aramis/ulme {{.deps_dir}}/aramiscd/ulme ; fi "
+      , " if [ ! -d {{.deps_dir}}/aramiscd/ulme-io ] ; then git clone https://git.sr.ht/~aramis/ulme-io {{.deps_dir}}/aramiscd/ulme-io ; fi "
       ]
     
   build :
