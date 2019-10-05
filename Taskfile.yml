@@ -5,7 +5,7 @@ version : 2
 vars :
   main_module : src/Main.hs
   target      : jsonfmt
-  tests       : tests/tests.hs
+  tests       : tests/Main.hs
   deps_dir    : deps
   bin_dir     : ~/.local/bin
   build_dir   : build
@@ -63,59 +63,58 @@ vars :
 tasks :
   setup :
     cmds :
-      [ " if [ ! -d {{.deps_dir}}/aramiscd/ulme ]; then
-            git clone git@eee.ygg:ulme
-                {{.deps_dir}}/aramiscd/ulme;
-          fi
+      [ " if [ ! -d {{.deps_dir}}/aramiscd/ulme ]
+        ; then git clone git@eee.ygg:ulme {{.deps_dir}}/aramiscd/ulme
+        ; fi
         "
-      , " if [ ! -d {{.deps_dir}}/aramiscd/ulme-io ]; then
-            git clone git@eee.ygg:ulme-io
-                {{.deps_dir}}/aramiscd/ulme-io;
-          fi
+      , " if [ ! -d {{.deps_dir}}/aramiscd/ulme-io ]
+        ; then git clone git@eee.ygg:ulme-io {{.deps_dir}}/aramiscd/ulme-io
+        ; fi
         "
       ]
     
   build :
     cmds :
       [ " mkdir -p {{.build_dir}} "
-      , " {{.ghc}} {{.ghc_args}} {{.main_module}}
-          {{.modules}} {{.deps}} -o {{.build_dir}}/{{.target}}
-        "
+      , " {{.ghc}} {{.ghc_args}} {{.main_module}} {{.modules}} {{.deps}} -o {{.build_dir}}/{{.target}} "
       ]
 
   build-dev :
     cmds :
       [ " mkdir -p {{.build_dir}} "
-      , " {{.ghc}} {{.ghc_args}} {{.ghc_dev_args}} {{.main_module}}
-          {{.modules}} {{.deps}} -o {{.build_dir}}/{{.target}}
-        "
+      , " {{.ghc}} {{.ghc_args}} {{.ghc_dev_args}} {{.main_module}} {{.modules}} {{.deps}} -o {{.build_dir}}/{{.target}} "
       ]
 
   watch :
     silent : true
     cmds :
-      [ " while true
-        ; do inotifywait -e modify -q -r src
-        ; task build-dev && clear && task run
-        ; done
-        "
-      ]
+      [ " while true ; do inotifywait -e modify -q -r src ; task build-dev && clear && task run ; done " ]
 
   test :
     cmds :
-      [ " {{.ghc}} {{.ghc_args}} {{.ghc_dev_args}} {{.ghc_test_args}}
-          {{.tests}} {{.modules}} {{.deps}}
-        "
-      , " tests/tests "
+      [ " mkdir -p {{.build_dir}} "
+      , " {{.ghc}} {{.ghc_args}} {{.ghc_test_args}} {{.tests}} {{.modules}} {{.deps}} -o {{.build_dir}}/tests "
+      , " {{.build_dir}}/tests "
+      ]
+
+  test-dev :
+    cmds :
+      [ " mkdir -p {{.build_dir}} "
+      , " {{.ghc}} {{.ghc_args}} {{.ghc_dev_args}} {{.ghc_test_args}} {{.tests}} {{.modules}} {{.deps}} -o {{.build_dir}}/tests "
+      , " {{.build_dir}}/tests "
       ]
 
   run :
     silent : true
     cmds :
-      [ " echo '{\"foo\":\"bla\",\"fooo\":\"bla\",\"foooo\":\"bla\"
-                ,\"fooooo\":\"bla\",\"foo\":\"bla\",\"foo\":\"bla\"
-                ,\"foo\":\"bla\",\"foo\":\"bla\"}'
-        | {{.build_dir}}/{{.target}} "
+      [ " echo
+            ' {\"foo\":\"bla\",\"fooo\":\"bla\",\"foooo\":\"bla\"
+              ,\"fooooo\":\"bla\",\"foo\":\"bla\",\"foo\":\"bla\"
+              ,\"foo\":\"bla\",\"foo\":\"bla\"
+              }
+            '
+        | {{.build_dir}}/{{.target}}
+        "
       ]
 
   install :
