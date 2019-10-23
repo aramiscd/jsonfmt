@@ -1,6 +1,13 @@
 module Main
 
 {-
+    Read a JSON document from stdin, parse it into a
+    `Json` value, apply a pretty-printer to it and write
+    the resulting string to the standard output.
+
+
+    ----
+
     Copyright 2019, Aramis Concepcion Duran
     
     This file is part of jsonfmt.
@@ -20,14 +27,6 @@ module Main
     You should have received a copy of the GNU General
     Public License along with Foobar.  If not, see
     <https://www.gnu.org/licenses/>.
-
-
-    -------------------------------------------------------
-
-
-    Read a JSON document from stdin, parse it into a
-    `Json` value, apply a pretty-printer to it and write
-    the resulting string to the standard output.
 -}
 
 ( main

@@ -1,6 +1,12 @@
 module Json
 
 {-
+    This module provides the `Json` data type: a simple,
+    well-typed Haskell-representation of JSON documents.
+
+
+    ----
+
     Copyright 2019, Aramis Concepcion Duran
     
     This file is part of jsonfmt.
@@ -20,13 +26,6 @@ module Json
     You should have received a copy of the GNU General
     Public License along with Foobar.  If not, see
     <https://www.gnu.org/licenses/>.
-
-
-    -------------------------------------------------------
-
-
-    This module provides the `Json` data type: a simple,
-    well-typed Haskell-representation of JSON documents.
 -}
 
 ( Json ( Jatom , Jarray , Jobject )

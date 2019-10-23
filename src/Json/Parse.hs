@@ -1,6 +1,14 @@
 module Json.Parse
 
 {-
+    A JSON-parsing module.
+
+    This module provides a parser function for JSON
+    documents, based on simple parser-combinators.
+
+
+    ----
+
     Copyright 2019, Aramis Concepcion Duran
     
     This file is part of jsonfmt.
@@ -20,15 +28,6 @@ module Json.Parse
     You should have received a copy of the GNU General
     Public License along with Foobar.  If not, see
     <https://www.gnu.org/licenses/>.
-
-
-    -------------------------------------------------------
-
-
-    A JSON-parsing module.
-
-    This module provides a parser function for JSON
-    documents, based on simple parser-combinators.
 -}
 
 ( Json ( Jatom , Jarray , Jobject )

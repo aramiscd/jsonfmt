@@ -1,30 +1,6 @@
 module Parse
 
 {-
-    Copyright 2019, Aramis Concepcion Duran
-    
-    This file is part of jsonfmt.
-
-    Jsonfmt is free software: you can redistribute it
-    and/or modify it under the terms of the GNU General
-    Public License as published by the Free Software
-    Foundation, either version 3 of the License, or (at
-    your option) any later version.
-
-    Jsonfmt is distributed in the hope that it will be
-    useful, but WITHOUT ANY WARRANTY; without even the
-    implied warranty of MERCHANTABILITY or FITNESS FOR
-    A PARTICULAR PURPOSE.  See the GNU General Public
-    License for more details.
-
-    You should have received a copy of the GNU General
-    Public License along with Foobar.  If not, see
-    <https://www.gnu.org/licenses/>.
-
-
-    -------------------------------------------------------
-
-
     A simple parser-combinator module.
 
     This work is part of my first attempt at non-trivial
@@ -44,6 +20,29 @@ module Parse
     type, but once we leave the monadic context of a list,
     we lose the ability to assemble values from multiple
     tokens and to pull apart or throw away values.
+
+
+    ----
+
+    Copyright 2019, Aramis Concepcion Duran
+    
+    This file is part of jsonfmt.
+
+    Jsonfmt is free software: you can redistribute it
+    and/or modify it under the terms of the GNU General
+    Public License as published by the Free Software
+    Foundation, either version 3 of the License, or (at
+    your option) any later version.
+
+    Jsonfmt is distributed in the hope that it will be
+    useful, but WITHOUT ANY WARRANTY; without even the
+    implied warranty of MERCHANTABILITY or FITNESS FOR
+    A PARTICULAR PURPOSE.  See the GNU General Public
+    License for more details.
+
+    You should have received a copy of the GNU General
+    Public License along with Foobar.  If not, see
+    <https://www.gnu.org/licenses/>.
 -}
 
 ( Parser
