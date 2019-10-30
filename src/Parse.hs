@@ -66,9 +66,22 @@ import qualified Ulme.String    as String
 
 type Parser a
 {-
-    A parser type.
+    A `Parser a` attempts to turn a `String` into a
+    value of type `a`.
+
+    If it fails, it results in an `Err error` where `error`
+    is a `ParseError`.  If it succeeds, it results in an
+    `Ok ( v , s )` where `v` is a value of type `a` and
+    `s` is the remaining input.
 -}
-    = String -> Result ( String , String ) ( a , String )
+    = String -> Result ParseError ( a , String )
+
+
+type ParseError
+{-
+    A parse error type.
+-}
+    = ( String , String )
 
 
 string :: String -> Parser [ String ]
