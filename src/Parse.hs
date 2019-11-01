@@ -71,17 +71,18 @@ type Parser a
 
     If it fails, it results in an `Err error` where `error`
     is a `ParseError`.  If it succeeds, it results in an
-    `Ok ( v , s )` where `v` is a value of type `a` and
-    `s` is the remaining input.
+    `Ok ( n , v , s )` where `n` is the number of consumed
+    characters, `v` is a value of type `a` and `s` is the
+    remaining input.
 -}
-    = String -> Result ParseError ( a , String )
+    = String -> Result ParseError ( Int , a , String )
 
 
 type ParseError
 {-
     A parse error type.
 -}
-    = ( String , String )
+    = String
 
 
 string :: String -> Parser [ String ]
@@ -93,11 +94,12 @@ string match input =
         String.startsWith match input
     then
         Ok
-            ( [ match ]
+            ( String.length match
+            , [ match ]
             , String.dropLeft ( String.length match ) input
             )
     else
-        Err ( match , input )
+        Err "" -- todo
 
 
 optional :: Parser [ a ] -> Parser [ a ]
@@ -106,8 +108,8 @@ optional :: Parser [ a ] -> Parser [ a ]
 -}
 optional parse input =
     case parse input of
+        Err _       -> Ok ( 0 , [] , input )
         Ok value    -> Ok value
-        _           -> Ok ( [] , input )
 
 
 throwAway :: Parser [ a ] -> Parser [ b ]
@@ -118,8 +120,8 @@ throwAway =
     map ( always [] )
     >> \ parse input ->
         case parse input of
-            Ok ( _ , pending )  -> Ok ( [] , pending )
-            Err error           -> Err error
+            Err error               -> Err error
+            Ok ( n , _ , pending )  -> Ok ( n , [] , pending )
 
 
 succeed :: a -> Parser a
@@ -130,7 +132,7 @@ succeed :: a -> Parser a
     application of parsers.
 -}
 succeed value input =
-    Ok ( value , input )
+    Ok ( 0 , value , input )
 
 
 fail :: Parser a
@@ -140,8 +142,8 @@ fail :: Parser a
     Useful as a `fold` kick-starter for trying out parsers
     in parallel until one succeeds.
 -}
-fail input =
-    Err ( "" , input )
+fail _input =
+    Err "" -- todo
 
 
 zeroOrMore :: Parser [ a ] -> Parser [ a ]
@@ -167,8 +169,8 @@ either :: Parser a -> Parser a -> Parser a
 -}
 either parser1 parser2 input =
     case parser1 input of
-        Ok value    -> Ok value
         Err _       -> parser2 input
+        Ok value    -> Ok value
 
 
 oneOf :: [ Parser a ] -> Parser a
@@ -186,12 +188,12 @@ succ :: Parser [ a ] -> Parser [ a ] -> Parser [ a ]
 -}
 succ parser1 parser2 input =
     case parser1 input of
-        Ok ( done1 , pending1 ) ->
-            case parser2 pending1 of
-                Ok ( done2 , pending2 ) ->
-                    Ok ( done1 ++ done2 , pending2 )
-                Err error -> Err error
         Err error -> Err error
+        Ok ( n1 , done1 , pending1 ) ->
+            case parser2 pending1 of
+                Err error -> Err error
+                Ok ( n2 , done2 , pending2 ) ->
+                    Ok ( n1 + n2 , done1 ++ done2 , pending2 )
 
 
 sequence :: [ Parser [ a ] ] -> Parser [ a ]
@@ -208,5 +210,5 @@ map :: ( a -> b ) -> Parser a -> Parser b
 -}
 map fn parse input =
     case parse input of
-        Ok ( done , pending )   -> Ok ( fn done , pending )
-        Err error               -> Err error
+        Err error                   -> Err error
+        Ok ( n , done , pending )   -> Ok ( n , fn done , pending )
