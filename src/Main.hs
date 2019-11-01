@@ -51,10 +51,10 @@ main =
         ( \ case
             Ok contents ->
                 case Parse.json contents of
-                    Ok ( json , [] ) ->
+                    Ok ( _ , json , [] ) ->
                         IO.println ( Pretty.print json )
 
-                    Ok ( _ , pending ) ->
+                    Ok ( _ , _ , pending ) ->
                         IO.printErr ( "Invalid JSON: " ++ pending )
                         >>> exitWith ( ExitFailure 1 )
 
