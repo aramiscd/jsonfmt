@@ -231,18 +231,15 @@ char :: Parser [ String ]
     Parse an unescaped character.
 -}
 char input =
-    let
-        error = Err ( "Expect valid char" , input )
-    in
-        case input of
-            [] -> error
-            ( head : tail ) ->
-                let
-                    c = Char.toCode head
-                in
-                    if c == 34 || c == 92 || c < 32 || c > 1114111
-                    then error
-                    else Ok ( [ String.fromChar head ] , tail )
+    case input of
+        "" -> Err "" -- todo
+        ( head : tail ) ->
+            let
+                c = Char.toCode head
+            in
+                if c == 34 || c == 92 || c < 32 || c > 1114111
+                then Err "" -- todo
+                else Ok ( 1 , [ String.fromChar head ] , tail )
 
 
 character :: Parser [ String ]
@@ -317,9 +314,9 @@ element =
         , Parse.throwAway whitespace
         ]
     >> \ case
-        Err error               -> Err error
-        Ok ( [ v ] , pending )  -> Ok ( v , pending )
-        Ok ( values , pending ) -> Err ( show values , pending )
+        Err error                   -> Err error
+        Ok ( n , [ v ] , pending )  -> Ok ( n , v , pending )
+        Ok ( _ , _ , _ )            -> Err "" -- todo
 
 
 elements :: Parser [ Json ]
@@ -381,9 +378,14 @@ member =
         , Parse.map List.singleton element
         ]
     >> \ case
-        Err error                   -> Err error
-        Ok ( [ k , v ] , pending )  -> Ok ( ( k, v ), pending )
-        Ok ( values, pending )      -> Err ( show values , pending )
+        Err error ->
+            Err error
+
+        Ok ( n , [ k , v ] , pending ) ->
+            Ok ( n , ( k , v ) , pending )
+
+        Ok ( _ , _ , _ ) ->
+            Err "" -- todo
 
 
 members :: Parser [ ( Json , Json ) ]
@@ -425,6 +427,6 @@ json :: Parser Json
 json =
     element
     >> \ case
-        Err error           -> Err error
-        Ok ( done , "" )    -> Ok ( done , "" )
-        Ok ( _ , pending )  -> Err ( "Invalid JSON" , pending )
+        Err error               -> Err error
+        Ok ( n , done , "" )    -> Ok ( n , done , "" )
+        Ok ( _ , _ , _ )        -> Err "" -- todo
