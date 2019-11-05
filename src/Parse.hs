@@ -54,6 +54,7 @@ module Parse
 , oneOf
 , sequence
 , map
+, withError
 )
 where
 
@@ -62,6 +63,7 @@ import Ulme hiding ( map )
 
 import qualified Ulme.List      as List
 import qualified Ulme.String    as String
+import qualified Ulme.Tuple     as Tuple
 
 
 type Parser a
@@ -69,20 +71,20 @@ type Parser a
     A `Parser a` attempts to turn a `String` into a
     value of type `a`.
 
-    If it fails, it results in an `Err error` where `error`
-    is a `ParseError`.  If it succeeds, it results in an
-    `Ok ( n , v , s )` where `n` is the number of consumed
-    characters, `v` is a value of type `a` and `s` is the
-    remaining input.
+    If it fails, it results in an `Err errs` where `errs`
+    is a list of `ParseError` values.  If it succeeds,
+    it results in an `Ok ( n , v , s )` where `n` is the
+    number of consumed characters, `v` is a value of type
+    `a` and `s` is the remaining input.
 -}
-    = String -> Result ParseError ( Int , a , String )
+    = String -> Result [ ParseError ] ( Int , a , String )
 
 
 type ParseError
 {-
     A parse error type.
 -}
-    = String
+    = ( Int , String )
 
 
 string :: String -> Parser [ String ]
@@ -99,7 +101,7 @@ string match input =
             , String.dropLeft ( String.length match ) input
             )
     else
-        Err "" -- todo
+        Err [ ( 0 , "Expecting `" ++ match ++ "`" ) ]
 
 
 optional :: Parser [ a ] -> Parser [ a ]
@@ -108,8 +110,8 @@ optional :: Parser [ a ] -> Parser [ a ]
 -}
 optional parse input =
     case parse input of
-        Err _       -> Ok ( 0 , [] , input )
-        Ok value    -> Ok value
+        Ok value -> Ok value
+        Err _ -> Ok ( 0 , [] , input )
 
 
 throwAway :: Parser [ a ] -> Parser [ b ]
@@ -120,13 +122,13 @@ throwAway =
     map ( always [] )
     >> \ parse input ->
         case parse input of
-            Err error               -> Err error
-            Ok ( n , _ , pending )  -> Ok ( n , [] , pending )
+            Err errs -> Err errs
+            Ok ( n , _done , pending ) -> Ok ( n , [] , pending )
 
 
 succeed :: a -> Parser a
 {-
-    Don't consume any input, just succeed with a value.
+    Don't consume any input, just succeed unconditionally.
 
     Useful as a `fold` kick-starter for the sequential
     application of parsers.
@@ -137,13 +139,13 @@ succeed value input =
 
 fail :: Parser a
 {-
-    Don't consume any input, just fail.
+    Don't consume any input, just fail unconditionally.
 
     Useful as a `fold` kick-starter for trying out parsers
     in parallel until one succeeds.
 -}
 fail _input =
-    Err "" -- todo
+    Err []
 
 
 zeroOrMore :: Parser [ a ] -> Parser [ a ]
@@ -167,10 +169,13 @@ either :: Parser a -> Parser a -> Parser a
     Apply the first succeeding parser from two
     alternatives.
 -}
-either parser1 parser2 input =
-    case parser1 input of
-        Err _       -> parser2 input
-        Ok value    -> Ok value
+either parse1 parse2 input =
+    case parse1 input of
+        Err errs1 ->
+            case parse2 input of
+                Err errs2 -> Err ( errs1 ++ errs2 )
+                Ok value -> Ok value
+        Ok value -> Ok value
 
 
 oneOf :: [ Parser a ] -> Parser a
@@ -188,10 +193,11 @@ succ :: Parser [ a ] -> Parser [ a ] -> Parser [ a ]
 -}
 succ parser1 parser2 input =
     case parser1 input of
-        Err error -> Err error
+        Err errs -> Err errs
         Ok ( n1 , done1 , pending1 ) ->
             case parser2 pending1 of
-                Err error -> Err error
+                Err errs ->
+                    Err ( List.map ( Tuple.mapFirst ( + n1 ) ) errs )
                 Ok ( n2 , done2 , pending2 ) ->
                     Ok ( n1 + n2 , done1 ++ done2 , pending2 )
 
@@ -210,5 +216,15 @@ map :: ( a -> b ) -> Parser a -> Parser b
 -}
 map fn parse input =
     case parse input of
-        Err error                   -> Err error
-        Ok ( n , done , pending )   -> Ok ( n , fn done , pending )
+        Err errs -> Err errs
+        Ok ( n , done , pending ) -> Ok ( n , fn done , pending )
+
+
+withError :: String -> Parser a -> Parser a
+withError error parse input =
+    case parse input of
+        Ok value -> Ok value
+        Err errs ->
+            case List.head errs of
+                Nothing -> Err [ ( 0 , error ) ]
+                Just ( n , _ ) -> Err [ ( n , error ) ]
