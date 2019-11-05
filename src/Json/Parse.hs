@@ -100,7 +100,8 @@ digit =
 
 digits :: Parser [ String ]
 {-
-    Parse any number of decimal digits.
+    Parse as many decimal digits as possible but at
+    least one.
 -}
 digits =
     Parse.oneOrMore digit
@@ -130,12 +131,10 @@ fraction :: Parser [ String ]
     Parse the fractional part of a floating-point number.
 -}
 fraction =
-    Parse.optional
-        ( Parse.sequence
-            [ Parse.string "."
-            , digits
-            ]
-        )
+    Parse.sequence
+        [ Parse.string "."
+        , digits
+        ]
 
 
 sign :: Parser [ String ]
@@ -160,13 +159,11 @@ exponent :: Parser [ String ]
     (if any).
 -}
 exponent =
-    Parse.optional
-        ( Parse.sequence
-            [ Parse.oneOf [ Parse.string "E" , Parse.string "e" ]
-            , sign
-            , digits
-            ]
-        )
+    Parse.sequence
+        [ Parse.oneOf [ Parse.string "E" , Parse.string "e" ]
+        , sign
+        , digits
+        ]
 
 
 number :: Parser [ String ]
@@ -178,7 +175,12 @@ number :: Parser [ String ]
     Only decimal notation is valid: no hex, no octal.
 -}
 number =
-    Parse.sequence [ integer , fraction , exponent ]
+    Parse.sequence
+        [ integer
+        , Parse.optional fraction
+        , Parse.optional exponent
+        ]
+    |> Parse.withError "Expecting a number"
 
 
 -- Strings ----------------------------------------------------------
@@ -232,13 +234,13 @@ char :: Parser [ String ]
 -}
 char input =
     case input of
-        "" -> Err "" -- todo
+        "" -> Err [ ( 0 , "Expecting more input" ) ]
         ( head : tail ) ->
             let
                 c = Char.toCode head
             in
                 if c == 34 || c == 92 || c < 32 || c > 1114111
-                then Err "" -- todo
+                then Err [ ( 0 , "Expecting a valid character" ) ]
                 else Ok ( 1 , [ String.fromChar head ] , tail )
 
 
@@ -271,9 +273,30 @@ string =
         , characters
         , Parse.string "\""
         ]
+    |> Parse.withError "Expecting a string"
 
 
--- Values -----------------------------------------------------------
+-- Booleans and null ------------------------------------------------
+
+
+bool :: Parser [ String ]
+{-
+    Parse `true` or `false`.
+-}
+bool =
+    Parse.oneOf [ Parse.string "true" , Parse.string "false" ]
+    |> Parse.withError "Expecting `true` or `false`"
+
+
+null :: Parser [ String ]
+{-
+    Parse `null`.
+-}
+null =
+    Parse.string "null"
+
+
+-- JSON values ------------------------------------------------------
 
 
 atom :: Parser Json
@@ -281,15 +304,8 @@ atom :: Parser Json
     Parse an atomic JSON value into a `Json` value.
 -}
 atom =
-    Parse.oneOf
-        [ string
-        , number
-        , Parse.string "true"
-        , Parse.string "false"
-        , Parse.string "null"
-        ]
-    |> Parse.map ( List.foldr (++) [] )
-    |> Parse.map Jatom
+    Parse.oneOf [ string , number , bool , null ]
+    |> Parse.map ( List.foldr (++) [] >> Jatom )
 
 
 value :: Parser Json
@@ -300,7 +316,7 @@ value =
     Parse.oneOf [ object , array , atom ]
 
 
--- Arrays -----------------------------------------------------------
+-- JSON arrays ------------------------------------------------------
 
 
 element :: Parser Json
@@ -314,9 +330,9 @@ element =
         , Parse.throwAway whitespace
         ]
     >> \ case
-        Err error                   -> Err error
-        Ok ( n , [ v ] , pending )  -> Ok ( n , v , pending )
-        Ok ( _ , _ , _ )            -> Err "" -- todo
+        Err errs -> Err errs
+        Ok ( n , [ v ] , pending ) -> Ok ( n , v , pending )
+        Ok ( n , _ , _ ) -> Err [ ( n , "Expecting end of input" ) ]
 
 
 elements :: Parser [ Json ]
@@ -348,7 +364,7 @@ array =
     |> Parse.map Jarray
 
 
--- Objects ----------------------------------------------------------
+-- JSON objects -----------------------------------------------------
 
 
 stringAtom :: Parser Json
@@ -378,14 +394,11 @@ member =
         , Parse.map List.singleton element
         ]
     >> \ case
-        Err error ->
-            Err error
-
+        Err errs -> Err errs
         Ok ( n , [ k , v ] , pending ) ->
             Ok ( n , ( k , v ) , pending )
-
-        Ok ( _ , _ , _ ) ->
-            Err "" -- todo
+        Ok ( n , _ , _ ) ->
+            Err [ ( n , "Expecting an object member" ) ]
 
 
 members :: Parser [ ( Json , Json ) ]
@@ -417,7 +430,7 @@ object =
     |> Parse.map Jobject
 
 
--- JSON documents ---------------------------------------------------
+-- JSON document ----------------------------------------------------
 
 
 json :: Parser Json
@@ -427,6 +440,6 @@ json :: Parser Json
 json =
     element
     >> \ case
-        Err error               -> Err error
-        Ok ( n , done , "" )    -> Ok ( n , done , "" )
-        Ok ( _ , _ , _ )        -> Err "" -- todo
+        Err errs -> Err errs
+        Ok ( n , done , "" ) -> Ok ( n , done , "" )
+        Ok ( n , _ , _ ) -> Err [ ( n , "Expecting end of input" ) ]
