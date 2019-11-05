@@ -37,6 +37,7 @@ where
 import Ulme
 
 import qualified Ulme.IO        as IO
+import qualified Ulme.String    as String
 
 import qualified Json.Parse     as Parse
 import qualified Json.Pretty    as Pretty
@@ -58,11 +59,20 @@ main =
                         IO.printErr ( "Invalid JSON: " ++ pending )
                         >>> exitWith ( ExitFailure 1 )
 
-                    Err error ->
-                        IO.printErr ( show error )
+                    Err parseErrors ->
+                        printParseErrors parseErrors
                         >>> exitWith ( ExitFailure 1 )
 
-            Err error ->
-                IO.printErr ( show error )
+            Err ioException ->
+                IO.printErr ( show ioException )
                 >>> exitWith ( ExitFailure 1 )
         )
+
+
+printParseErrors :: [ ( Int , String ) ] -> IO ()
+printParseErrors errors =
+    let
+        printError ( n , error ) =
+            String.fromIntegral n ++ ": " ++ error
+    in
+        IO.printErr ( String.join "\n" ( map printError errors ) )
