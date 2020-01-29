@@ -1,8 +1,15 @@
 # jsonfmt
 
-An **experimental** JSON pretty printer, inspired by
+**Work in progress!**
+
+An experimental JSON pretty printer, inspired by
 [elm-format](https://github.com/avh4/elm-format), written
 in Haskell.
+
+Right now this program is just an artifact proving that
+I can write a simple parser.  I do use it in practice to
+format JSON documents, but it will probably choke on any
+input with a non-trivial size.
 
 It reads a JSON document from the standard input, reformats
 it and writes it to the standard output.  It has no
