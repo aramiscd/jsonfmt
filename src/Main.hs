@@ -57,15 +57,15 @@ main =
 
                     Ok ( _ , _ , pending ) ->
                         IO.printErr ( "Invalid JSON: " ++ pending )
-                        >>> exitWith ( ExitFailure 1 )
+                        *> exitWith ( ExitFailure 1 )
 
                     Err parseErrors ->
                         printParseErrors parseErrors
-                        >>> exitWith ( ExitFailure 1 )
+                        *> exitWith ( ExitFailure 1 )
 
             Err ioException ->
                 IO.printErr ( show ioException )
-                >>> exitWith ( ExitFailure 1 )
+                *> exitWith ( ExitFailure 1 )
         )
 
 

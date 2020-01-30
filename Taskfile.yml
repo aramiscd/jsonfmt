@@ -3,36 +3,35 @@
 version : 2
 
 vars :
-  main_module : src/Main.hs
-  target      : jsonfmt
-  tests       : tests/Main.hs
-  deps_dir    : deps
-  bin_dir     : ~/.local/bin
-  build_dir   : build
-  ghc         : /usr/bin/ghc
+  target  : jsonfmt
+  ghc     : ~/.ghcup/bin/ghc
 
   modules :
-    ./src/Json.hs
-    ./src/Json/Parse.hs
-    ./src/Json/Pretty.hs
-    ./src/Parse.hs
+    src/Main.hs
+    src/Parse.hs
+    src/Json.hs
+    src/Json/Parse.hs
+    src/Json/Pretty.hs
+    
+  tests :
+    tests/Main.hs
 
   deps :
-    ./{{.deps_dir}}/aramiscd/ulme/src/Ulme.hs
-    ./{{.deps_dir}}/aramiscd/ulme/src/Ulme/Basics.hs
-    ./{{.deps_dir}}/aramiscd/ulme/src/Ulme/Char.hs
-    ./{{.deps_dir}}/aramiscd/ulme/src/Ulme/Dict.hs
-    ./{{.deps_dir}}/aramiscd/ulme/src/Ulme/List.hs
-    ./{{.deps_dir}}/aramiscd/ulme/src/Ulme/Maybe.hs
-    ./{{.deps_dir}}/aramiscd/ulme/src/Ulme/Result.hs
-    ./{{.deps_dir}}/aramiscd/ulme/src/Ulme/Set.hs
-    ./{{.deps_dir}}/aramiscd/ulme/src/Ulme/String.hs
-    ./{{.deps_dir}}/aramiscd/ulme/src/Ulme/Tuple.hs
-    ./{{.deps_dir}}/aramiscd/ulme-io/src/Ulme/IO.hs
+    deps/aramis/ulme/src/Ulme.hs
+    deps/aramis/ulme/src/Ulme/Basics.hs
+    deps/aramis/ulme/src/Ulme/Char.hs
+    deps/aramis/ulme/src/Ulme/Dict.hs
+    deps/aramis/ulme/src/Ulme/List.hs
+    deps/aramis/ulme/src/Ulme/Maybe.hs
+    deps/aramis/ulme/src/Ulme/Result.hs
+    deps/aramis/ulme/src/Ulme/Set.hs
+    deps/aramis/ulme/src/Ulme/String.hs
+    deps/aramis/ulme/src/Ulme/Tuple.hs
+    deps/aramis/ulme-io/src/Ulme/IO.hs
 
   ghc_args :
-    -hidir {{.build_dir}}
-    -odir {{.build_dir}}
+    -hidir build
+    -odir build
     -Werror
     -Weverything
     -Wno-missing-import-lists
@@ -63,20 +62,30 @@ vars :
 tasks :
   setup :
     cmds :
-      [ " if [ ! -d {{.deps_dir}}/aramiscd/ulme ] ; then git clone https://git.sr.ht/~aramis/ulme {{.deps_dir}}/aramiscd/ulme ; fi "
-      , " if [ ! -d {{.deps_dir}}/aramiscd/ulme-io ] ; then git clone https://git.sr.ht/~aramis/ulme-io {{.deps_dir}}/aramiscd/ulme-io ; fi "
+      [ " if [ ! -d deps/aramis/ulme ]
+        ; then git clone https://git.sr.ht/~aramis/ulme deps/aramis/ulme
+        ; fi
+        ; cd deps/aramis/ulme
+        ; git checkout -q f5d0dd66e3751c3f5eefe82efe36e96831255cb7
+        "
+      , " if [ ! -d deps/aramis/ulme-io ]
+        ; then git clone https://git.sr.ht/~aramis/ulme-io deps/aramis/ulme-io
+        ; fi
+        ; cd deps/aramis/ulme-io
+        ; git checkout -q 35f80da754822ef36779792065a565882dfe4bf7
+        "
       ]
     
   build :
     cmds :
-      [ " mkdir -p {{.build_dir}} "
-      , " {{.ghc}} {{.ghc_args}} {{.main_module}} {{.modules}} {{.deps}} -o {{.build_dir}}/{{.target}} "
+      [ " mkdir -p build "
+      , " {{.ghc}} {{.ghc_args}} {{.modules}} {{.deps}} -o build/{{.target}} "
       ]
 
   build-dev :
     cmds :
-      [ " mkdir -p {{.build_dir}} "
-      , " {{.ghc}} {{.ghc_args}} {{.ghc_dev_args}} {{.main_module}} {{.modules}} {{.deps}} -o {{.build_dir}}/{{.target}} "
+      [ " mkdir -p build "
+      , " {{.ghc}} {{.ghc_args}} {{.ghc_dev_args}} {{.modules}} {{.deps}} -o build/{{.target}} "
       ]
 
   watch :
@@ -86,16 +95,16 @@ tasks :
 
   test :
     cmds :
-      [ " mkdir -p {{.build_dir}} "
-      , " {{.ghc}} {{.ghc_args}} {{.ghc_test_args}} {{.tests}} {{.modules}} {{.deps}} -o {{.build_dir}}/tests "
-      , " {{.build_dir}}/tests "
+      [ " mkdir -p build "
+      , " {{.ghc}} {{.ghc_args}} {{.ghc_test_args}} {{.tests}} {{.modules}} {{.deps}} -o build/tests "
+      , " build/tests "
       ]
 
   test-dev :
     cmds :
-      [ " mkdir -p {{.build_dir}} "
-      , " {{.ghc}} {{.ghc_args}} {{.ghc_dev_args}} {{.ghc_test_args}} {{.tests}} {{.modules}} {{.deps}} -o {{.build_dir}}/tests "
-      , " {{.build_dir}}/tests "
+      [ " mkdir -p build "
+      , " {{.ghc}} {{.ghc_args}} {{.ghc_dev_args}} {{.ghc_test_args}} {{.tests}} {{.modules}} {{.deps}} -o build/tests "
+      , " build/tests "
       ]
 
   run :
@@ -107,21 +116,21 @@ tasks :
               ,\"foo\":\"bla\",\"foo\":\"bla\"
               }
             '
-        | {{.build_dir}}/{{.target}}
+        | build/{{.target}}
         "
       ]
 
   install :
     cmds :
-      [ " mkdir -p {{.bin_dir}} "
-      , " cp {{.build_dir}}/{{.target}} {{.bin_dir}} "
+      [ " mkdir -p ~/.local/bin "
+      , " cp build/{{.target}} ~/.local/bin/{{.target}} "
       ]
 
   clean :
     cmds :
-      [ " rm -rf {{.build_dir}} " ]
+      [ " rm -rf build " ]
 
   clean-all :
     cmds :
-      [ " rm -rf {{.build_dir}} {{.deps_dir}} "
+      [ " rm -rf build deps "
       ]
