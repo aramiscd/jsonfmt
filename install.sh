@@ -1,3 +1,5 @@
+#!/bin/sh
+#
 # See https://git.sr.ht/~aramis/jsonfmt/README.md
 
 tmp=$( mktemp -d )
