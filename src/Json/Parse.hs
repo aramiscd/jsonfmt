@@ -6,8 +6,8 @@ module Json.Parse
     This module provides a parser function for JSON
     documents, based on simple parser-combinators.
 
-    Read this module from to to bottom.  Simple parsers
-    are introduced first.
+    I think, it is best to read this module from top
+    to bottom.  Simple parsers are introduced first.
 
 
     ----
