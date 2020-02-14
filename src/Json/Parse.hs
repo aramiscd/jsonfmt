@@ -372,7 +372,7 @@ stringAtom :: Parser Json
     Parse a JSON string into a `Json` value.
 
     This is a version of `atom` that only parses strings.
-    We need that because the keys of JSON objects are only
+    We need this because the keys of JSON objects are only
     allowed to be strings.
 -}
 stringAtom =
