@@ -41,7 +41,7 @@ module Json.Pretty
 
     ----
 
-    Copyright 2019, Aramis Concepcion Duran
+    Copyright 2019-2020, Aramis Concepcion Duran
     
     This file is part of jsonfmt.
 
@@ -69,7 +69,7 @@ where
 
 import Ulme
 
-import qualified Ulme.String    as String
+import qualified Ulme.String as String
 
 import Json ( Json ( Jatom , Jarray , Jobject ) )
 
@@ -83,18 +83,18 @@ print value =
     |> String.join "\n"
 
 
-printValue :: Json -> [ String ]
+printValue :: Json -> List String
 {-
     Pretty-print a JSON value as a list of strings.
 -}
 printValue value =
     case value of
-        Jatom atom      -> [ atom ]
+        Jatom atom -> [ atom ]
         Jarray elements -> printArray elements
         Jobject members -> printObject members
 
 
-printArray :: [ Json ] -> [ String ]
+printArray :: List Json -> List String
 {-
     Pretty-print a JSON array as a list of strings.
 -}
@@ -107,7 +107,7 @@ printArray array =
             ++ [ "]" ]
 
 
-printElement :: Bool -> Json -> [ String ]
+printElement :: Bool -> Json -> List String
 {-
     Pretty-print a JSON array element as a list of strings.
 -}
@@ -122,7 +122,7 @@ printElement isFirst element =
                 [ prefix ++ firstLine ] ++ map ( "  " ++ ) lines
 
 
-printObject :: [ ( Json , Json ) ] -> [ String ]
+printObject :: List ( Json , Json ) -> List String
 {-
     Pretty-print a JSON object as a list of strings.
 -}
@@ -135,7 +135,7 @@ printObject object =
             ++ [ "}" ]
 
 
-printMember :: Bool -> ( Json , Json ) -> [ String ]
+printMember :: Bool -> ( Json , Json ) -> List String
 {-
     Pretty-print a JSON object member as a list of strings.
 -}

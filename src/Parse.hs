@@ -24,7 +24,7 @@ module Parse
 
     ----
 
-    Copyright 2019, Aramis Concepcion Duran
+    Copyright 2019-2020, Aramis Concepcion Duran
     
     This file is part of jsonfmt.
 
@@ -77,7 +77,7 @@ type Parser a
     number of consumed characters, `v` is a value of type
     `a` and `s` is the remaining input.
 -}
-    = String -> Result [ ParseError ] ( Int , a , String )
+    = String -> Result ( List ParseError ) ( Int , a , String )
 
 
 type ParseError
@@ -87,13 +87,12 @@ type ParseError
     = ( Int , String )
 
 
-string :: String -> Parser [ String ]
+string :: String -> Parser ( List String )
 {-
     Parse a `String`.
 -}
 string match input =
-    if
-        String.startsWith match input
+    if String.startsWith match input
     then
         Ok
             ( String.length match
@@ -104,17 +103,17 @@ string match input =
         Err [ ( 0 , "Expecting `" ++ match ++ "`" ) ]
 
 
-optional :: Parser [ a ] -> Parser [ a ]
+optional :: Parser ( List a ) -> Parser ( List a )
 {-
     Optionally apply a parser.
 -}
 optional parse input =
     case parse input of
         Ok value -> Ok value
-        Err _ -> Ok ( 0 , [] , input )
+        Err _error -> Ok ( 0 , [] , input )
 
 
-throwAway :: Parser [ a ] -> Parser [ b ]
+throwAway :: Parser ( List a ) -> Parser ( List b )
 {-
     Apply a parser and throw away the result.
 -}
@@ -148,7 +147,7 @@ fail _input =
     Err []
 
 
-zeroOrMore :: Parser [ a ] -> Parser [ a ]
+zeroOrMore :: Parser ( List a ) -> Parser ( List a )
 {-
     Apply a parser as often as possible.
 -}
@@ -156,7 +155,7 @@ zeroOrMore parse =
     optional ( oneOrMore parse )
 
 
-oneOrMore :: Parser [ a ] -> Parser [ a ]
+oneOrMore :: Parser ( List a ) -> Parser ( List a )
 {-
     Apply a parser as often as possible but at least once.
 -}
@@ -171,14 +170,14 @@ either :: Parser a -> Parser a -> Parser a
 -}
 either parse1 parse2 input =
     case parse1 input of
+        Ok value -> Ok value
         Err errs1 ->
             case parse2 input of
                 Err errs2 -> Err ( errs1 ++ errs2 )
                 Ok value -> Ok value
-        Ok value -> Ok value
 
 
-oneOf :: [ Parser a ] -> Parser a
+oneOf :: List ( Parser a ) -> Parser a
 {-
     Apply the fist succeeding parser from a list of
     parsers.
@@ -187,7 +186,7 @@ oneOf parsers =
     List.foldr either fail parsers
 
 
-succ :: Parser [ a ] -> Parser [ a ] -> Parser [ a ]
+succ :: Parser ( List a ) -> Parser ( List a ) -> Parser ( List a )
 {-
     Apply two parsers one after the other.
 -}
@@ -202,7 +201,7 @@ succ parser1 parser2 input =
                     Ok ( n1 + n2 , done1 ++ done2 , pending2 )
 
 
-sequence :: [ Parser [ a ] ] -> Parser [ a ]
+sequence :: List ( Parser ( List a ) ) -> Parser ( List a )
 {-
     Apply a list of parsers, one after another.
 -}

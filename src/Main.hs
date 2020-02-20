@@ -8,7 +8,7 @@ module Main
 
     ----
 
-    Copyright 2019, Aramis Concepcion Duran
+    Copyright 2019-2020, Aramis Concepcion Duran
     
     This file is part of jsonfmt.
 
@@ -42,7 +42,7 @@ import qualified Ulme.String    as String
 import qualified Json.Parse     as Parse
 import qualified Json.Pretty    as Pretty
 
-import System.Exit  ( ExitCode ( ExitFailure ) , exitWith )
+import System.Exit ( ExitCode ( ExitFailure ) , exitWith )
 
 
 main :: IO ()
@@ -69,7 +69,7 @@ main =
         )
 
 
-printParseErrors :: [ ( Int , String ) ] -> IO ()
+printParseErrors :: List ( Int , String ) -> IO ()
 printParseErrors errors =
     let
         printError ( n , error ) =

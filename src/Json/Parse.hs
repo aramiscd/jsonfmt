@@ -12,7 +12,7 @@ module Json.Parse
 
     ----
 
-    Copyright 2019, Aramis Concepcion Duran
+    Copyright 2019-2020, Aramis Concepcion Duran
     
     This file is part of jsonfmt.
 
@@ -51,7 +51,7 @@ import Json     ( Json ( Jatom , Jarray , Jobject ) )
 import Parse    ( Parser )
 
 
-whitespace :: Parser [ String ]
+whitespace :: Parser ( List String )
 {-
     Parse whitespace (greedy).
 -}
@@ -69,7 +69,7 @@ whitespace =
 -- Integers ---------------------------------------------------------
 
 
-onenine :: Parser [ String ]
+onenine :: Parser ( List String )
 {-
     Parse a non-zero decimal digit.
 -}
@@ -87,7 +87,7 @@ onenine =
         ]
 
 
-digit :: Parser [ String ]
+digit :: Parser ( List String )
 {-
     Parse a decimal digit.
 -}
@@ -98,7 +98,7 @@ digit =
         ] 
 
 
-digits :: Parser [ String ]
+digits :: Parser ( List String )
 {-
     Parse as many decimal digits as possible but at
     least one.
@@ -107,7 +107,7 @@ digits =
     Parse.oneOrMore digit
 
 
-integer :: Parser [ String ]
+integer :: Parser ( List String )
 {-
     Parse an integer.
 
@@ -126,7 +126,7 @@ integer =
 -- Floating-point numbers -------------------------------------------
 
 
-fraction :: Parser [ String ]
+fraction :: Parser ( List String )
 {-
     Parse the fractional part of a floating-point number.
 -}
@@ -137,7 +137,7 @@ fraction =
         ]
 
 
-sign :: Parser [ String ]
+sign :: Parser ( List String )
 {-
     Parse the sign of a scientific exponential suffix.
 
@@ -153,7 +153,7 @@ sign =
         )
 
 
-exponent :: Parser [ String ]
+exponent :: Parser ( List String )
 {-
     Parse the scientific exponential suffix of a number
     (if any).
@@ -166,7 +166,7 @@ exponent =
         ]
 
 
-number :: Parser [ String ]
+number :: Parser ( List String )
 {-
     Parse a JSON number.
 
@@ -186,7 +186,7 @@ number =
 -- Strings ----------------------------------------------------------
 
 
-hex :: Parser [ String ]
+hex :: Parser ( List String )
 {-
     Parse a hexadecimal digit.
 -}
@@ -210,7 +210,7 @@ hex =
         ]
 
 
-escape :: Parser [ String ]
+escape :: Parser ( List String )
 {-
     Parse an escape character.
 -}
@@ -228,7 +228,7 @@ escape =
         ]
 
 
-char :: Parser [ String ]
+char :: Parser ( List String )
 {-
     Parse an unescaped character.
 -}
@@ -236,15 +236,14 @@ char input =
     case input of
         "" -> Err [ ( 0 , "Expecting more input" ) ]
         ( head : tail ) ->
-            let
-                c = Char.toCode head
+            let c = Char.toCode head
             in
                 if c == 34 || c == 92 || c < 32 || c > 1114111
                 then Err [ ( 0 , "Expecting a valid character" ) ]
                 else Ok ( 1 , [ String.fromChar head ] , tail )
 
 
-character :: Parser [ String ]
+character :: Parser ( List String )
 {-
     Parse a character.
 -}
@@ -255,15 +254,15 @@ character =
         ]
 
 
-characters :: Parser [ String ]
+characters :: Parser ( List String )
 {-
     Parse any number of characters.
 -}
-characters  =
+characters =
     Parse.zeroOrMore character
 
 
-string :: Parser [ String ]
+string :: Parser ( List String )
 {-
     Parse a JSON string.
 -}
@@ -279,7 +278,7 @@ string =
 -- Booleans and null ------------------------------------------------
 
 
-bool :: Parser [ String ]
+bool :: Parser ( List String )
 {-
     Parse `true` or `false`.
 -}
@@ -288,7 +287,7 @@ bool =
     |> Parse.withError "Expecting `true` or `false`"
 
 
-null :: Parser [ String ]
+null :: Parser ( List String )
 {-
     Parse `null`.
 -}
@@ -335,7 +334,7 @@ element =
         Ok ( n , _ , _ ) -> Err [ ( n , "Expecting end of input" ) ]
 
 
-elements :: Parser [ Json ]
+elements :: Parser ( List Json )
 {-
     Parse elements of a JSON array.
 -}
@@ -395,13 +394,11 @@ member =
         ]
     >> \ case
         Err errs -> Err errs
-        Ok ( n , [ k , v ] , pending ) ->
-            Ok ( n , ( k , v ) , pending )
-        Ok ( n , _ , _ ) ->
-            Err [ ( n , "Expecting an object member" ) ]
+        Ok ( n , [ k , v ] , pending ) -> Ok ( n , ( k , v ) , pending )
+        Ok ( n , _ , _ ) -> Err [ ( n , "Expecting an object member" ) ]
 
 
-members :: Parser [ ( Json , Json ) ]
+members :: Parser ( List ( Json , Json ) )
 {-
     Parse the members of a JSON object.
 -}

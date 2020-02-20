@@ -7,7 +7,7 @@ module Json
 
     ----
 
-    Copyright 2019, Aramis Concepcion Duran
+    Copyright 2019-2020, Aramis Concepcion Duran
     
     This file is part of jsonfmt.
 
@@ -38,9 +38,9 @@ import Ulme
 
 data Json
 {-
-    A data type for representing JSON Documents.
+    Data type for representing JSON Documents.
 -}
     = Jatom String
-    | Jarray [ Json ]
-    | Jobject [ ( Json , Json ) ]
+    | Jarray ( List Json )
+    | Jobject ( List ( Json , Json ) )
     deriving Show
