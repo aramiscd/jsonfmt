@@ -1,5 +1,1 @@
-/build/
-/deps/
-/tests/data/
-**.hi
-**.o
+/dist-newstyle/

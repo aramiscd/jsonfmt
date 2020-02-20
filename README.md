@@ -6,11 +6,6 @@ An experimental JSON pretty printer, inspired by
 [elm-format](https://github.com/avh4/elm-format), written
 in Haskell.
 
-Right now this program is just an artifact proving that
-I can write a simple parser.  I do use it in practice to
-format JSON documents, but it will probably choke on any
-input with a non-trivial size.
-
 It reads a JSON document from the standard input, reformats
 it and writes it to the standard output.  It has no
 configuration or command line options.
@@ -18,45 +13,48 @@ configuration or command line options.
 It will turn this:
 
 ```json
-{"k1":"v1","k2":"v2","k3":["e1","e2","e3"]}
+{
+  "key_1": "value_1",
+  "key_2": "value_2",
+  "key_3": ["elem_1","elem_2","elem_3"]
+}
 ```
     
 into this:
 
 ```json
-{ "k1" : "v1"
-, "k2" : "v2"
-, "k3" :
-    [ "e1"
-    , "e2"
-    , "e3"
+{ "key_1" : "value_1"
+, "key_2" : "value_2"
+, "key_3" :
+    [ "elem_1"
+    , "elem_2"
+    , "elem_3"
     ]
 }
 ```
 
+Right now this program is mainly an artifact demontrating
+that I can write a simple parser.  I do use it in practice
+to format JSON documents, but it can only handle relatively
+small inputs.
+
 
 ## Installation
 
-I'd like to provide a fully statically linked linux
-binary, but I haven't yet figured out how to create that
-from Haskell sources.  For now there is just a provisional
-install script for Ubuntu 18.04 and 19.04.  It will attempt
-to build jsonfmt and copy it to `~/.local/bin/`.  It will
-not touch your `$PATH`.
+### From source
 
-```bash
-sudo apt install -y curl
-```
-
-```bash
-curl -L https://git.sr.ht/~aramis/jsonfmt/blob/master/install.sh | sh
-```
+    $ git clone https://git.sr.ht/~aramis/jsonfmt
+    $ cd jsonfmt
+    $ cabal v2-install
 
 
-## Usage examples
+## Usage
 
-To format a JSON document in Vim/Neovim, type `:%!jsonfmt`
-and hit `Return`.
+### Kakoune
 
-To format a JSON document in Kakoune, type `%|jsonfmt`
-and hit `Return`.
+    %|jsonfmt
+
+
+### Vim/Neovim
+
+    :%!jsonfmt
