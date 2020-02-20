@@ -43,7 +43,7 @@ small inputs.
 
 ### From source
 
-```sh
+```shell
 $ ghc --version
 The Glorious Glasgow Haskell Compilation System, version 8.6.5
     
@@ -52,7 +52,7 @@ cabal-install version 3.0.0.0
 compiled using version 3.0.0.0 of the Cabal library
 ```
 
-```sh
+```shell
 $ git clone https://git.sr.ht/~aramis/jsonfmt
 $ cd jsonfmt
 $ cabal v2-install
@@ -63,13 +63,13 @@ $ cabal v2-install
 
 ### Kakoune
 
-```
+```text
 %|jsonfmt
 ```
 
 
 ### Vim/Neovim
 
-```
+```text
 :%!jsonfmt
 ```
