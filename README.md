@@ -58,6 +58,8 @@ $ cd jsonfmt
 $ cabal v2-install
 ```
 
+Make sure `~/.cabal/bin/` is in your `$PATH`.
+
 
 ## Usage
 
