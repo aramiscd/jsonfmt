@@ -10,28 +10,7 @@ It reads a JSON document from the standard input, reformats
 it and writes it to the standard output.  It has no
 configuration or command line options.
 
-It will turn this:
-
-```json
-{
-  "key_1": "value_1",
-  "key_2": "value_2",
-  "key_3": ["elem_1","elem_2","elem_3"]
-}
-```
-    
-into this:
-
-```json
-{ "key_1" : "value_1"
-, "key_2" : "value_2"
-, "key_3" :
-    [ "elem_1"
-    , "elem_2"
-    , "elem_3"
-    ]
-}
-```
+![jsonfmt](jsonfmt.gif)
 
 Right now this program is mainly an artifact demontrating
 that I can write a simple parser.  I do use it in practice
