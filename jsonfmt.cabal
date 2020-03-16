@@ -1,7 +1,7 @@
 cabal-version   : 2.2
 
 name            : jsonfmt
-version         : 0.1.0.0
+version         : 0.1.0
 synopsis        : 
 homepage        : json pretty printer
 stability       : experimental
