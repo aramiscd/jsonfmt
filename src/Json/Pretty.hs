@@ -89,9 +89,9 @@ printValue :: Json -> List String
 -}
 printValue value =
     case value of
-        Jatom atom -> [ atom ]
-        Jarray elements -> printArray elements
-        Jobject members -> printObject members
+    Jatom atom -> [ atom ]
+    Jarray elements -> printArray elements
+    Jobject members -> printObject members
 
 
 printArray :: List Json -> List String
@@ -100,11 +100,11 @@ printArray :: List Json -> List String
 -}
 printArray array =
     case array of
-        [] -> [ "[]" ]
-        firstElement : elements ->
-            printElement True firstElement
-            ++ ( elements |> andThen ( printElement False ) )
-            ++ [ "]" ]
+    [] -> [ "[]" ]
+    firstElement : elements ->
+        printElement True firstElement
+        ++ ( elements >>= ( printElement False ) )
+        ++ [ "]" ]
 
 
 printElement :: Bool -> Json -> List String
@@ -112,14 +112,10 @@ printElement :: Bool -> Json -> List String
     Pretty-print a JSON array element as a list of strings.
 -}
 printElement isFirst element =
-    let
-        prefix = if isFirst then "[ " else  ", "
-    in
-        printValue element
-        |> \ case
-            [] -> []
-            firstLine : lines ->
-                [ prefix ++ firstLine ] ++ map ( "  " ++ ) lines
+    let prefix = if isFirst then "[ " else  ", " in
+    printValue element |> \ case
+    [] -> []
+    firstLine : lines -> [ prefix ++ firstLine ] ++ map ( "  " ++ ) lines
 
 
 printObject :: List ( Json , Json ) -> List String
@@ -128,11 +124,11 @@ printObject :: List ( Json , Json ) -> List String
 -}
 printObject object =
     case object of
-        [] -> [ "{}" ]
-        firstMember : members ->
-            printMember True firstMember
-            ++ ( members >>= printMember False )
-            ++ [ "}" ]
+    [] -> [ "{}" ]
+    firstMember : members ->
+        printMember True firstMember
+        ++ ( members >>= printMember False )
+        ++ [ "}" ]
 
 
 printMember :: Bool -> ( Json , Json ) -> List String
@@ -140,16 +136,10 @@ printMember :: Bool -> ( Json , Json ) -> List String
     Pretty-print a JSON object member as a list of strings.
 -}
 printMember isFirst ( key , value ) =
-    let
-        prefix = if isFirst then "{ " else  ", "
-    in
-        printValue key
-        |> \ case
-            [] -> []
-            k : _ ->
-                case printValue value of
-                    [ line ] ->
-                        [ prefix ++ k ++ " : " ++ line ]
-                    lines ->
-                        [ prefix ++ k ++ " :" ]
-                        ++ map ( "    " ++ ) lines
+    let prefix = if isFirst then "{ " else  ", " in
+    printValue key |> \ case
+    [] -> []
+    k : _ ->
+        case printValue value of
+        [ line ] -> [ prefix ++ k ++ " : " ++ line ]
+        lines -> [ prefix ++ k ++ " :" ] ++ map ( "    " ++ ) lines

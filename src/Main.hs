@@ -47,26 +47,23 @@ import System.Exit ( ExitCode ( ExitFailure ) , exitWith )
 
 main :: IO ()
 main =
-    IO.getContents IO.stdin
-    |> andThen
-        ( \ case
-            Ok contents ->
-                case Parse.json contents of
-                    Ok ( _ , json , [] ) ->
-                        IO.println ( Pretty.print json )
+    IO.getContents IO.stdin >>= \ case
+    Ok contents ->
+        case Parse.json contents of
+        Ok ( _ , json , [] ) ->
+            IO.println ( Pretty.print json )
 
-                    Ok ( _ , _ , pending ) ->
-                        IO.printErr ( "Invalid JSON: " ++ pending )
-                        *> exitWith ( ExitFailure 1 )
+        Ok ( _ , _ , pending ) -> do
+            IO.printErr ( "Invalid JSON: " ++ pending )
+            exitWith ( ExitFailure 1 )
 
-                    Err parseErrors ->
-                        printParseErrors parseErrors
-                        *> exitWith ( ExitFailure 1 )
+        Err parseErrors -> do
+            printParseErrors parseErrors
+            exitWith ( ExitFailure 1 )
 
-            Err ioException ->
-                IO.printErr ( show ioException )
-                *> exitWith ( ExitFailure 1 )
-        )
+    Err ioException -> do
+        IO.printErr ( show ioException )
+        exitWith ( ExitFailure 1 )
 
 
 printParseErrors :: List ( Int , String ) -> IO ()

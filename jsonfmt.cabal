@@ -51,8 +51,8 @@ executable jsonfmt
 
     build-depends :
         base == 4.12.*
-      , ulme == 0.1.*
-      , ulme-io == 0.1.*
+      , ulme == 0.2.*
+      , ulme-io == 0.3.*
 
     other-modules :
         Json

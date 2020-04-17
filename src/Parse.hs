@@ -109,8 +109,8 @@ optional :: Parser ( List a ) -> Parser ( List a )
 -}
 optional parse input =
     case parse input of
-        Ok value -> Ok value
-        Err _error -> Ok ( 0 , [] , input )
+    Ok value -> Ok value
+    Err _error -> Ok ( 0 , [] , input )
 
 
 throwAway :: Parser ( List a ) -> Parser ( List b )
@@ -118,11 +118,9 @@ throwAway :: Parser ( List a ) -> Parser ( List b )
     Apply a parser and throw away the result.
 -}
 throwAway =
-    map ( always [] )
-    >> \ parse input ->
-        case parse input of
-            Err errs -> Err errs
-            Ok ( n , _done , pending ) -> Ok ( n , [] , pending )
+    map ( always [] ) >> \ parse input -> case parse input of
+    Err errs -> Err errs
+    Ok ( n , _done , pending ) -> Ok ( n , [] , pending )
 
 
 succeed :: a -> Parser a
@@ -170,11 +168,11 @@ either :: Parser a -> Parser a -> Parser a
 -}
 either parse1 parse2 input =
     case parse1 input of
+    Ok value -> Ok value
+    Err errs1 ->
+        case parse2 input of
+        Err errs2 -> Err ( errs1 ++ errs2 )
         Ok value -> Ok value
-        Err errs1 ->
-            case parse2 input of
-                Err errs2 -> Err ( errs1 ++ errs2 )
-                Ok value -> Ok value
 
 
 oneOf :: List ( Parser a ) -> Parser a
@@ -192,13 +190,13 @@ succ :: Parser ( List a ) -> Parser ( List a ) -> Parser ( List a )
 -}
 succ parser1 parser2 input =
     case parser1 input of
-        Err errs -> Err errs
-        Ok ( n1 , done1 , pending1 ) ->
-            case parser2 pending1 of
-                Err errs ->
-                    Err ( List.map ( Tuple.mapFirst ( + n1 ) ) errs )
-                Ok ( n2 , done2 , pending2 ) ->
-                    Ok ( n1 + n2 , done1 ++ done2 , pending2 )
+    Err errs -> Err errs
+    Ok ( n1 , done1 , pending1 ) ->
+        case parser2 pending1 of
+        Err errs ->
+            Err ( List.map ( Tuple.mapFirst ( + n1 ) ) errs )
+        Ok ( n2 , done2 , pending2 ) ->
+            Ok ( n1 + n2 , done1 ++ done2 , pending2 )
 
 
 sequence :: List ( Parser ( List a ) ) -> Parser ( List a )
@@ -215,15 +213,15 @@ map :: ( a -> b ) -> Parser a -> Parser b
 -}
 map fn parse input =
     case parse input of
-        Err errs -> Err errs
-        Ok ( n , done , pending ) -> Ok ( n , fn done , pending )
+    Err errs -> Err errs
+    Ok ( n , done , pending ) -> Ok ( n , fn done , pending )
 
 
 withError :: String -> Parser a -> Parser a
 withError error parse input =
     case parse input of
-        Ok value -> Ok value
-        Err errs ->
-            case List.head errs of
-                Nothing -> Err [ ( 0 , error ) ]
-                Just ( n , _ ) -> Err [ ( n , error ) ]
+    Ok value -> Ok value
+    Err errs ->
+        case List.head errs of
+        Nothing -> Err [ ( 0 , error ) ]
+        Just ( n , _ ) -> Err [ ( n , error ) ]

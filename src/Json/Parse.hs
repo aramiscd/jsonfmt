@@ -234,13 +234,12 @@ char :: Parser ( List String )
 -}
 char input =
     case input of
-        "" -> Err [ ( 0 , "Expecting more input" ) ]
-        ( head : tail ) ->
-            let c = Char.toCode head
-            in
-                if c == 34 || c == 92 || c < 32 || c > 1114111
-                then Err [ ( 0 , "Expecting a valid character" ) ]
-                else Ok ( 1 , [ String.fromChar head ] , tail )
+    "" -> Err [ ( 0 , "Expecting more input" ) ]
+    ( head : tail ) ->
+        let c = Char.toCode head in
+        if c == 34 || c == 92 || c < 32 || c > 1114111
+        then Err [ ( 0 , "Expecting a valid character" ) ]
+        else Ok ( 1 , [ String.fromChar head ] , tail )
 
 
 character :: Parser ( List String )
@@ -329,9 +328,9 @@ element =
         , Parse.throwAway whitespace
         ]
     >> \ case
-        Err errs -> Err errs
-        Ok ( n , [ v ] , pending ) -> Ok ( n , v , pending )
-        Ok ( n , _ , _ ) -> Err [ ( n , "Expecting end of input" ) ]
+    Err errs -> Err errs
+    Ok ( n , [ v ] , pending ) -> Ok ( n , v , pending )
+    Ok ( n , _ , _ ) -> Err [ ( n , "Expecting end of input" ) ]
 
 
 elements :: Parser ( List Json )
@@ -393,9 +392,9 @@ member =
         , Parse.map List.singleton element
         ]
     >> \ case
-        Err errs -> Err errs
-        Ok ( n , [ k , v ] , pending ) -> Ok ( n , ( k , v ) , pending )
-        Ok ( n , _ , _ ) -> Err [ ( n , "Expecting an object member" ) ]
+    Err errs -> Err errs
+    Ok ( n , [ k , v ] , pending ) -> Ok ( n , ( k , v ) , pending )
+    Ok ( n , _ , _ ) -> Err [ ( n , "Expecting an object member" ) ]
 
 
 members :: Parser ( List ( Json , Json ) )
@@ -435,8 +434,7 @@ json :: Parser Json
     Parse an entire JSON document.
 -}
 json =
-    element
-    >> \ case
-        Err errs -> Err errs
-        Ok ( n , done , "" ) -> Ok ( n , done , "" )
-        Ok ( n , _ , _ ) -> Err [ ( n , "Expecting end of input" ) ]
+    element >> \ case
+    Err errs -> Err errs
+    Ok ( n , done , "" ) -> Ok ( n , done , "" )
+    Ok ( n , _ , _ ) -> Err [ ( n , "Expecting end of input" ) ]
