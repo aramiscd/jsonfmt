@@ -3,6 +3,9 @@
 version : 2
 
 tasks :
+    repl :
+        cmds : [ " cabal v2-repl " ]
+
     build :
         cmds : [ " cabal v2-build " ]
 
