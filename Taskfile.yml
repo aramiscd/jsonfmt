@@ -16,7 +16,7 @@ tasks :
         cmds : [ " cabal v2-run " ]
 
     install :
-        cmds : [ " cabal v2-install " ]
+        cmds : [ " cabal v2-install --overwrite-policy=always" ]
 
     clean :
         cmds : [ " cabal v2-clean " ]

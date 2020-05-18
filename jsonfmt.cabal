@@ -1,7 +1,7 @@
 cabal-version   : 2.2
 
 name            : jsonfmt
-version         : 0.1.1
+version         : 0.2.0
 synopsis        : 
 homepage        : json pretty printer
 stability       : experimental
@@ -39,6 +39,7 @@ executable jsonfmt
         -Wno-unsafe
 
     default-extensions :
+        ApplicativeDo
         BlockArguments
         DuplicateRecordFields
         LambdaCase
@@ -55,12 +56,7 @@ executable jsonfmt
      -- source repo packages
       , ulme
       , ulme-io
-
-    other-modules :
-        Json
-        Json.Parse
-        Json.Pretty
-        Parse
+      , ulme-json
 
 
 source-repository head
