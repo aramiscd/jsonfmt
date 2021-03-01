@@ -12,7 +12,7 @@ configuration or command line options.
 
 ![jsonfmt](jsonfmt.gif)
 
-Right now this program is mainly an artifact demontrating
+Right now this program is mainly an artifact demonstrating
 that I can write a simple parser.  I do use it in practice
 to format JSON documents, but it can only handle relatively
 small inputs.
