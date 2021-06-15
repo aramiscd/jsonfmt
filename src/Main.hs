@@ -36,12 +36,11 @@ where
 
 import Ulme
 
-import qualified Ulme.IO            as IO
-import qualified Ulme.Json.Parse    as Parse
-import qualified Ulme.Json.Pretty   as Pretty
-import qualified Ulme.String        as String
-
-import System.Exit ( ExitCode ( ExitFailure ) , exitWith )
+import System.Exit      ( ExitCode ( ExitFailure ) , exitWith )
+import Ulme.IO          qualified as IO
+import Ulme.Json.Parse  qualified as Parse
+import Ulme.Json.Pretty qualified as Pretty
+import Ulme.String      qualified as String
 
 
 main :: IO ()
@@ -65,10 +64,12 @@ main =
         exitWith ( ExitFailure 1 )
 
 
-printParseErrors :: List ( Integer , String ) -> IO ()
+printParseErrors :: List ( ( Natural , Natural ) , String ) -> IO ()
 printParseErrors errors =
     let
-        printError ( n , error ) =
-            String.fromIntegral n ++ ": " ++ error
+        printError ( ( line , column ) , error ) =
+            "(" ++  String.fromIntegral line ++
+            "," ++ String.fromIntegral column ++
+            "): " ++ error
     in
         IO.printErr ( String.join "\n" ( map printError errors ) )
