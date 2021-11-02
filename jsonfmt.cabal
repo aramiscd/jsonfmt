@@ -1,6 +1,6 @@
 cabal-version           : 2.2
 name                    : jsonfmt
-version                 : 0.3.0
+version                 : 0.4.0
 synopsis                : 
 homepage                : json pretty printer
 copyright               : (c) 2019-2020 Aramís Concepción Durán
