@@ -18,6 +18,7 @@ executable jsonfmt
     default-language    : Haskell2010
     hs-source-dirs      : src
     main-is             : Main.hs
+    other-modules       : Ulme.Json Ulme.Json.Parse Ulme.Json.Pretty Ulme.Parse
 
     ghc-options         : -Werror
                           -Weverything
@@ -32,8 +33,10 @@ executable jsonfmt
                           -Wno-type-defaults
                           -Wno-unsafe
                       -- dev
+                         --Wno-missing-export-lists
                          --Wno-unused-binds
                          --Wno-unused-imports
+                         --Wno-unused-matches
                          --Wno-unused-packages
 
     default-extensions  : AllowAmbiguousTypes

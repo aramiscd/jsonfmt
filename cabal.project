@@ -13,9 +13,9 @@ source-repository-package
 source-repository-package
     type        : git
     location    : https://git.sr.ht/~aramis/ulme-parse
-    tag         : v0.6.1
+    tag         : v0.6.4
 
 source-repository-package
     type        : git
     location    : https://git.sr.ht/~aramis/ulme-json
-    tag         : v0.4.0
+    tag         : v0.5.2

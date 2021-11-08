@@ -38,7 +38,7 @@ import Ulme.Json.Pretty qualified as Pretty
 
 main :: IO ()
 main =
-    IO.getContents IO.stdin >>= \case
+    IO.getContents IO.stdin >>= \ case
         Ok contents ->
             case Parse.json contents of
                 Just json -> IO.println (Pretty.print json)
