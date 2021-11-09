@@ -1,6 +1,6 @@
 cabal-version           : 2.2
 name                    : jsonfmt
-version                 : 0.5.1
+version                 : 0.5.2
 synopsis                : 
 homepage                : json pretty printer
 copyright               : (c) 2019-2020 Aramís Concepción Durán
@@ -18,7 +18,6 @@ executable jsonfmt
     default-language    : Haskell2010
     hs-source-dirs      : src
     main-is             : Main.hs
-    other-modules       : Ulme.Json Ulme.Json.Parse Ulme.Json.Pretty Ulme.Parse
 
     ghc-options         : -Werror
                           -Weverything
