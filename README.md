@@ -1,21 +1,20 @@
 # jsonfmt
 
-**Work in progress!**
+A JSON pretty printer.
 
-An experimental JSON pretty printer, inspired by
-[elm-format](https://github.com/avh4/elm-format), written
-in Haskell.
-
-It reads a JSON document from the standard input, reformats
-it and writes it to the standard output.  It has no
-configuration or command line options.
+Read a JSON document from stdin, reformat it and write it to stdout.
+No configuration, no command line options.
 
 ![jsonfmt](jsonfmt.gif)
 
-Right now this program is mainly an artifact demonstrating
-that I can write a simple parser.  I do use it in practice
-to format JSON documents, but it can only handle relatively
-small inputs.
+The formatter operates purely on the JSON syntax tree.  Whitespace
+is not taken into consideration.  Commas are placed in a leading
+position.
+
+This program was an exercise in writing a combinatory parser based
+on a DIY parsing library.  Thus, I'm not sure how well it handles
+large inputs.  I do use it in practice to format JSON documents
+though, and I have never run into any problems so far.
 
 
 ## Installation
@@ -23,21 +22,12 @@ small inputs.
 ### From source
 
 ```shell
-$ ghc --version
-The Glorious Glasgow Haskell Compilation System, version 8.6.5
-    
-$ cabal --version
-cabal-install version 3.0.0.0
-compiled using version 3.0.0.0 of the Cabal library
-```
-
-```shell
 $ git clone https://git.sr.ht/~aramis/jsonfmt
 $ cd jsonfmt
-$ cabal v2-install
+$ cabal install
 ```
 
-Make sure `~/.cabal/bin/` is in your `$PATH`.
+(Make sure `~/.cabal/bin/` is in your `$PATH`.)
 
 
 ## Usage
