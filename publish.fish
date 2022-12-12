@@ -1,5 +1,5 @@
 #!/usr/bin/env fish
-git push
-git push --tags
-git push sr
-git push sr --tags
+git push git@git.eee.gg:aramis/jsonfmt
+git push git@git.eee.gg:aramis/jsonfmt --tags
+git push git@git.sr.ht:~aramis/jsonfmt
+git push git@git.sr.ht:~aramis/jsonfmt --tags

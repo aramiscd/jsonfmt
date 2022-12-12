@@ -1,9 +1,9 @@
 cabal-version           : 2.2
 name                    : jsonfmt
-version                 : 0.5.2
+version                 : 0.6.0
 synopsis                : 
 homepage                : json pretty printer
-copyright               : (c) 2019-2020 Aramís Concepción Durán
+copyright               : (c) 2019-2022 Aramís Concepción Durán
 license                 : GPL-3.0-only
 license-file            : LICENSE
 author                  : Aramís Concepción Durán <aramis@systemli.org>
