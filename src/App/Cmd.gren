@@ -1,0 +1,21 @@
+module App.Cmd exposing
+    ( exitFailure
+    , printLine
+    )
+
+import App.Msg exposing ( Msg )
+import Node
+import Stream exposing ( Stream )
+import Task
+
+
+exitFailure : Cmd Msg
+exitFailure =
+    Node.exitWithCode 1
+    |> Task.execute
+
+
+printLine : Stream -> String -> Cmd Msg
+printLine toStream data =
+    Stream.sendLine toStream data
+    |> Task.execute

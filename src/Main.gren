@@ -1,0 +1,17 @@
+module Main exposing ( main )
+
+import App.Init exposing ( init )
+import App.Model exposing ( Model )
+import App.Msg exposing ( Msg )
+import App.Subscriptions exposing ( subscriptions )
+import App.Update exposing ( update )
+import Node
+
+
+main : Node.Program Model Msg
+main =
+    Node.defineProgram
+        { init = init
+        , update = update
+        , subscriptions = subscriptions
+        }

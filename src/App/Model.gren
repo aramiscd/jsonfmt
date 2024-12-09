@@ -1,0 +1,14 @@
+module App.Model exposing ( Model, init )
+
+import Node
+
+
+type alias Model =
+    { env : Node.Environment
+    }
+
+
+init : Node.Environment -> Model
+init env =
+    { env = env
+    }

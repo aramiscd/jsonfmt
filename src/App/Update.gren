@@ -1,0 +1,31 @@
+module App.Update exposing ( update )
+
+import App.Cmd
+import App.Model exposing ( Model )
+import App.Msg as Msg exposing ( Msg )
+import Bytes exposing ( Bytes )
+import Json.Parse
+import Json.Pretty
+
+
+update : Msg -> Model -> { model : Model, command : Cmd Msg }
+update msg mdl =
+    case msg of
+        Msg.Run input -> run mdl input
+
+
+run : Model -> Bytes -> { model : Model, command : Cmd Msg }
+run mdl bytes =
+    Bytes.toString bytes
+    |> Maybe.andThen Json.Parse.run
+    |> ( \ result ->
+        case result of
+            Nothing ->
+                { model = mdl
+                , command = App.Cmd.exitFailure
+                }
+            Just json ->
+                { model = mdl
+                , command = App.Cmd.printLine mdl.env.stdout ( Json.Pretty.print json )
+                }
+       )

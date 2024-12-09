@@ -1,36 +1,42 @@
 # jsonfmt
 
-A JSON pretty printer.
+Ein JSON Pretty-Printer
 
-Read a JSON document from stdin, reformat it and write it to stdout.
-No configuration, no command line options.
+Liest ein JSON-Dokument von der Standardeingabe, formatiert es und
+schreibt es auf die Standardausgabe.  Keine Konfiguration, keine
+Kommandozeilenargumente.
 
 ![jsonfmt](jsonfmt.gif)
 
-The formatter operates purely on the JSON syntax tree.  Whitespace
-is not taken into consideration.  Commas are placed in a leading
-position.
+Die Formatierung operiert ausschließlich auf dem JSON-Syntaxbaum.
+Whitespace (Zeilenumbrüche etc.) spielt keine Rolle.  Kommata werden
+am Anfang platziert.
 
-This program was an exercise in writing a combinatory parser based
-on a DIY parsing library.  Thus, I'm not sure how well it handles
-large inputs.  I do use it in practice to format JSON documents
-though, and I have never run into any problems so far.
+Der Code basiert auf einer kleinen Bibliothek für kombinatorisches
+Parsen, die ich selbst geschrieben habe.  Ich weiß nicht, wie gut die
+Anwendung mit großen Dateien zurechtkommt.  Ich nutze sie regelmäßig,
+um JSON-Dokumente zu formatieren und hatte bisher keine Probleme.
 
 
 ## Installation
 
-### From source
+Einfach kompilieren, als ausführbar markieren und in ein `$PATH`
+Verzeichnis verschieben, bspw.:
 
 ```shell
 $ git clone https://git.sr.ht/~aramis/jsonfmt
 $ cd jsonfmt
-$ cabal install
+$ gren make src/Main.gren --output=jsonfmt
+$ chmod +x jsonfmt
+$ mv jsonfmt ~/.local/bin/
 ```
 
-(Make sure `~/.cabal/bin/` is in your `$PATH`.)
 
+## Verwendung
 
-## Usage
+Jeder Editor, der Text durch eine externe Anwendung pipen kann, kann
+`jsonfmt` verwenden.
+
 
 ### Kakoune
 
