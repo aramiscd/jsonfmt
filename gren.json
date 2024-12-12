@@ -7,12 +7,12 @@
     "gren-version": "0.4.5",
     "dependencies": {
         "direct": {
-            "aramiscd/gren-json": "1.0.0",
+            "aramiscd/gren-json": "1.1.1",
             "gren-lang/core": "5.1.1",
             "gren-lang/node": "4.2.1"
         },
         "indirect": {
-            "aramiscd/gren-parse": "1.1.0",
+            "aramiscd/gren-parse": "1.2.0",
             "gren-lang/parser": "4.0.0",
             "gren-lang/url": "4.0.0"
         }
