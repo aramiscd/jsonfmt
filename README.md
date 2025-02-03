@@ -38,7 +38,7 @@ Jeder Editor, der Text durch eine externe Anwendung pipen kann, kann
 `jsonfmt` verwenden.
 
 
-### Kakoune
+### Helix, Kakoune
 
 ```text
 %|jsonfmt
