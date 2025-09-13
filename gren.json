@@ -1,20 +1,18 @@
-{
-    "type": "application",
-    "platform": "node",
-    "source-directories": [
-        "src"
-    ],
-    "gren-version": "0.4.5",
-    "dependencies": {
-        "direct": {
-            "aramiscd/gren-json": "1.1.1",
-            "gren-lang/core": "5.1.1",
-            "gren-lang/node": "4.2.1"
-        },
-        "indirect": {
-            "aramiscd/gren-parse": "1.2.0",
-            "gren-lang/parser": "4.0.0",
-            "gren-lang/url": "4.0.0"
+{ "type" : "application"
+, "platform" : "node"
+, "source-directories" :
+    [ "src"
+    ]
+, "gren-version" : "0.6.3"
+, "dependencies" :
+    { "direct" :
+        { "aramiscd/gren-json" : "3.0.0"
+        , "aramiscd/gren-parse" : "3.0.0"
+        , "gren-lang/core" : "7.0.1"
+        , "gren-lang/node" : "6.1.0"
+        }
+    , "indirect" :
+        { "gren-lang/url" : "6.0.0"
         }
     }
 }

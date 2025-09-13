@@ -10,12 +10,10 @@ Kommandozeilenargumente.
 
 Die Formatierung operiert ausschließlich auf dem JSON-Syntaxbaum.
 Whitespace (Zeilenumbrüche etc.) spielt keine Rolle.  Kommata werden
-am Anfang platziert.
+am Zeilenanfang platziert.
 
 Der Code basiert auf einer kleinen Bibliothek für kombinatorisches
-Parsen, die ich selbst geschrieben habe.  Ich weiß nicht, wie gut die
-Anwendung mit großen Dateien zurechtkommt.  Ich nutze sie regelmäßig,
-um JSON-Dokumente zu formatieren und hatte bisher keine Probleme.
+Parsen, die ich selbst geschrieben habe.
 
 
 ## Installation
@@ -24,9 +22,7 @@ Einfach kompilieren, als ausführbar markieren und in ein `$PATH`
 Verzeichnis verschieben, bspw.:
 
 ```shell
-$ git clone https://git.sr.ht/~aramis/jsonfmt
-$ cd jsonfmt
-$ gren make src/Main.gren --output=jsonfmt
+$ scripts/build.fish
 $ chmod +x jsonfmt
 $ mv jsonfmt ~/.local/bin/
 ```

@@ -4,18 +4,19 @@ module App.Cmd exposing
     )
 
 import App.Msg exposing ( Msg )
+import Bytes exposing ( Bytes )
 import Node
-import Stream exposing ( Stream )
+import Stream
 import Task
 
 
 exitFailure : Cmd Msg
 exitFailure =
     Node.exitWithCode 1
-    |> Task.execute
 
 
-printLine : Stream -> String -> Cmd Msg
+printLine : Stream.Writable Bytes -> String -> Cmd Msg
 printLine toStream data =
-    Stream.sendLine toStream data
+    Stream.writeStringAsBytes data toStream
+    |> Task.onError ( \ _ -> Task.succeed toStream )
     |> Task.execute

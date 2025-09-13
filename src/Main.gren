@@ -12,6 +12,6 @@ main : Node.Program Model Msg
 main =
     Node.defineProgram
         { init = init
-        , update = update
         , subscriptions = subscriptions
+        , update = update
         }

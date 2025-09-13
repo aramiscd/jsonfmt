@@ -1,3 +1,4 @@
 .gren
-app
+gren_packages
 jsonfmt
+node_modules

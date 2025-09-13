@@ -1,10 +1,11 @@
 module App.Subscriptions exposing ( subscriptions )
 
-import App.Model as Model exposing ( Model )
-import App.Msg as Msg exposing ( Msg )
-import Stream
+import App.Model exposing ( Model )
+import App.Msg exposing ( Msg )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions mdl =
-    Stream.listen mdl.env.stdin Msg.Run
+    Sub.batch
+        [
+        ]

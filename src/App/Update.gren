@@ -8,18 +8,22 @@ import Json.Parse
 import Json.Pretty
 
 
-update : Msg -> Model -> { model : Model, command : Cmd Msg }
+type alias Update =
+    Model -> { model : Model, command : Cmd Msg }
+
+
+update : Msg -> Update
 update msg mdl =
-    case msg of
-        Msg.Run input -> run mdl input
+    when msg is
+        Msg.Run input -> run input mdl
 
 
-run : Model -> Bytes -> { model : Model, command : Cmd Msg }
-run mdl bytes =
+run : Bytes -> Update
+run bytes mdl =
     Bytes.toString bytes
     |> Maybe.andThen Json.Parse.run
     |> ( \ result ->
-        case result of
+        when result is
             Nothing ->
                 { model = mdl
                 , command = App.Cmd.exitFailure
