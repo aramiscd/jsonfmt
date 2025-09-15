@@ -1,6 +1,7 @@
 module App.Cmd exposing
     ( exitFailure
     , printLine
+    , run
     )
 
 import App.Msg exposing ( Msg )
@@ -8,6 +9,13 @@ import Bytes exposing ( Bytes )
 import Node
 import Stream
 import Task
+
+
+run : Stream.Readable Bytes -> Cmd Msg
+run stdin =
+    Stream.read stdin
+    |> Task.onError ( \ _ -> Task.succeed Bytes.empty )
+    |> Task.perform App.Msg.Run
 
 
 exitFailure : Cmd Msg

@@ -1,5 +1,6 @@
 module App.Init exposing ( init )
 
+import App.Cmd
 import App.Model exposing ( Model )
 import App.Msg exposing ( Msg )
 import Init
@@ -8,4 +9,7 @@ import Node
 
 init : Node.Environment -> Init.Task { model : Model, command : Cmd Msg } 
 init env =
-    Node.startProgram { model = App.Model.init env , command = Cmd.none }
+    Node.startProgram
+        { model = App.Model.init env
+        , command = App.Cmd.run env.stdin
+        }
