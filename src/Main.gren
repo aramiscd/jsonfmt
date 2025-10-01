@@ -1,17 +1,51 @@
 module Main exposing ( main )
 
-import App.Init exposing ( init )
-import App.Model exposing ( Model )
-import App.Msg exposing ( Msg )
-import App.Subscriptions exposing ( subscriptions )
-import App.Update exposing ( update )
+import Bytes exposing ( Bytes )
+import Init
+import Json.Parse
+import Json.Pretty
 import Node
+import Stream
+import Task exposing ( Task )
 
 
-main : Node.Program Model Msg
+main : Node.SimpleProgram msg
 main =
-    Node.defineProgram
-        { init = init
-        , subscriptions = subscriptions
-        , update = update
-        }
+    let
+        program : Node.Environment -> Init.Task ( Cmd msg ) 
+        program env =
+            task Stream.read "reading failed" env.stdin
+            |> Task.andThen ( maybe Bytes.toString "decoding failed" )
+            |> Task.andThen ( maybe Json.Parse.run "parsing failed" )
+            |> Task.map Json.Pretty.print
+            |> Task.andThen ( task ( print env.stdout ) "writing failed" )
+            |> Task.onError ( fail env.stderr )
+            |> Node.endSimpleProgram
+    in
+        Node.defineSimpleProgram program
+
+
+-- Operiere auf einem Maybe-Wert und übersetze in einen Task-Wert
+maybe : ( a -> Maybe b ) -> error -> a -> Task error b
+maybe fn error x =
+    fn x |> Maybe.map Task.succeed |> Maybe.withDefault ( Task.fail error )
+
+
+-- Operiere auf einem Task-Wert und lege den Fehler fest
+task : ( a -> Task e b ) -> error -> a -> Task error b
+task fn error x =
+    fn x |> Task.onError ( \ _ -> Task.fail error )
+
+
+-- Schreibe einen String-Wert in einen Bytes-Datenstrom
+print : Stream.Writable Bytes -> String -> Task Stream.Error ( Stream.Writable Bytes )
+print stream string =
+    Stream.writeLineAsBytes string stream
+
+
+-- Schreibe auf die Standardfehlerausgabe und setze den Exit-Code
+fail : Stream.Writable Bytes -> String -> Task Never ( Stream.Writable Bytes )
+fail stream error =
+    Node.setExitCode 1
+    |> Task.andThen ( \ _ -> Stream.writeLineAsBytes ( "Error: " ++ error ) stream )
+    |> Task.onError ( \ _ -> Task.succeed stream )

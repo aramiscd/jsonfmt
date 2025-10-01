@@ -1,7 +1,0 @@
-module App.Msg exposing ( Msg (..) )
-
-import Bytes exposing ( Bytes )
-
-
-type Msg
-    = Run Bytes
