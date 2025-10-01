@@ -30,6 +30,6 @@ run bytes mdl =
                 }
             Just json ->
                 { model = mdl
-                , command = App.Cmd.printLine mdl.env.stdout ( Json.Pretty.print json ++ "\n" )
+                , command = App.Cmd.printLine mdl.env.stdout ( Json.Pretty.print json )
                 }
        )
