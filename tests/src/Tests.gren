@@ -21,11 +21,7 @@ tests permission env =
         Expect.equal expectedOutput actualOutput
 
 
-apply :
-    ChildProcess.Permission ->
-    Node.Environment ->
-    String ->
-    Task ChildProcess.FailedRun String
+apply : ChildProcess.Permission -> Node.Environment -> String -> Task ChildProcess.FailedRun String
 apply permission env input =
     ChildProcess.run permission "fish" [ "apply-jsonfmt.fish", input ] ChildProcess.defaultRunOptions
     |> Task.onError
@@ -44,8 +40,7 @@ apply permission env input =
     |> Task.andThen
         ( \ successfulRun ->
             let
-                size = Bytes.length successfulRun.stdout
-                stdout = when decode ( Bytes.Decode.string size ) successfulRun.stdout is
+                stdout = when Bytes.toString successfulRun.stdout is
                     Nothing -> "error while decoding"
                     Just string -> string
             in
