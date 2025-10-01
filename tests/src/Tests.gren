@@ -1,0 +1,53 @@
+module Tests exposing ( tests )
+
+import Bytes
+import Bytes.Decode exposing ( decode )
+import ChildProcess
+import Expect
+import Node
+import Stream
+import Task exposing ( Task )
+import Test.Runner.Effectful as Test exposing ( Test, test )
+
+
+tests : ChildProcess.Permission -> Node.Environment -> Test
+tests permission env =
+    let
+        input = "[1,2,3]"
+        expectedOutput = "[ 1\n, 2\n, 3\n]\n"
+    in
+        Test.await "Wende jsonfmt auf eine Eingabe an" ( apply permission env input ) <| \ actualOutput ->
+        test "Prüfe die Ausgabe von jsonfmt" <| \ {} ->
+        Expect.equal expectedOutput actualOutput
+
+
+apply :
+    ChildProcess.Permission ->
+    Node.Environment ->
+    String ->
+    Task ChildProcess.FailedRun String
+apply permission env input =
+    ChildProcess.run permission "fish" [ "apply-jsonfmt.fish", input ] ChildProcess.defaultRunOptions
+    |> Task.onError
+        ( \ failedRun ->
+            ( when failedRun is
+                ChildProcess.InitError args ->
+                    Stream.writeLineAsBytes "InitError:" env.stdout
+                    |> Task.andThen ( \ _ -> Stream.writeLineAsBytes args.errorCode env.stdout )
+                ChildProcess.ProgramError args ->
+                    Stream.writeLineAsBytes "ProgramError:" env.stdout
+                    |> Task.andThen ( \ _ -> Stream.write args.stderr env.stdout )
+            )
+            |> Task.mapError ( \ _ -> failedRun )
+            |> Task.andThen ( \ _ -> Task.fail failedRun )
+        )
+    |> Task.andThen
+        ( \ successfulRun ->
+            let
+                size = Bytes.length successfulRun.stdout
+                stdout = when decode ( Bytes.Decode.string size ) successfulRun.stdout is
+                    Nothing -> "error while decoding"
+                    Just string -> string
+            in
+                Task.succeed stdout
+        )

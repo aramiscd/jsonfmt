@@ -1,0 +1,20 @@
+module Main exposing ( main )
+
+import ChildProcess
+import FileSystem
+import Init
+import Node
+import Test.Runner.Effectful exposing ( run )
+import Tests exposing ( tests )
+
+
+main : Node.SimpleProgram a
+main =
+    let
+        startProgram : Node.Environment -> ChildProcess.Permission -> Init.Task ( Cmd msg )
+        startProgram env permission = run env ( tests permission env )
+
+        program : Node.Environment -> Init.Task ( Cmd msg )
+        program env = Init.await ChildProcess.initialize ( startProgram env )
+    in
+        Node.defineSimpleProgram program
