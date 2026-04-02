@@ -3,16 +3,16 @@
 , "source-directories" :
     [ "src"
     ]
-, "gren-version" : "0.6.3"
+, "gren-version" : "0.6.5"
 , "dependencies" :
     { "direct" :
         { "aramiscd/gren-json" : "3.0.0"
-        , "aramiscd/gren-parse" : "3.0.0"
-        , "gren-lang/core" : "7.0.1"
-        , "gren-lang/node" : "6.1.0"
+        , "gren-lang/core" : "7.4.0"
+        , "gren-lang/node" : "6.1.1"
         }
     , "indirect" :
-        { "gren-lang/url" : "6.0.0"
+        { "aramiscd/gren-parse" : "3.0.0"
+        , "gren-lang/url" : "6.0.0"
         }
     }
 }
